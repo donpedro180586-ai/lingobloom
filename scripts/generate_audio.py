@@ -3,12 +3,18 @@
 
 Usage:
     pip install edge-tts
-    python scripts/generate_audio.py          # generate missing files
+    python scripts/generate_audio.py          # generate what is missing / outdated
     python scripts/generate_audio.py --list   # only print the texts (no network)
+
+Voice and speed come from TTS_VOICE / TTS_RATE (the "Run workflow" form on GitHub).
+If they change, every file is re-created. Progress is stored in audio/_meta.json, so a
+run that fails half way can simply be started again and it continues where it stopped.
 
 File names use the same FNV-1a hash as h32() in index.html.
 """
 import asyncio
+import json
+import os
 import pathlib
 import re
 import sys
@@ -16,12 +22,10 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "index.html"
 OUT = ROOT / "audio"
-import os
+META = OUT / "_meta.json"
 
-# Female: ru-RU-SvetlanaNeural, male: ru-RU-DmitryNeural. Both can be set from the
-# "Run workflow" form on GitHub (Actions tab) via TTS_VOICE / TTS_RATE.
-VOICE = os.environ.get("TTS_VOICE") or "ru-RU-SvetlanaNeural"
-RATE = os.environ.get("TTS_RATE") or "-10%"   # slower = easier for learners
+DEFAULT_VOICE = "ru-RU-SvetlanaNeural"   # female; male: ru-RU-DmitryNeural
+DEFAULT_RATE = "-10%"                    # slower = easier for learners
 FORCE = "--force" in sys.argv or os.environ.get("FORCE", "").lower() == "true"
 
 
@@ -62,19 +66,40 @@ def collect() -> list[str]:
     return out
 
 
-async def make(text: str, path: pathlib.Path) -> bool:
+def load_meta() -> dict | None:
+    if META.exists():
+        try:
+            return json.loads(META.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    existing = [p.stem for p in OUT.glob("*.mp3")] if OUT.exists() else []
+    if existing:  # made by the very first run, with the default settings
+        return {"voice": DEFAULT_VOICE, "rate": DEFAULT_RATE, "done": existing}
+    return None
+
+
+def save_meta(meta: dict) -> None:
+    OUT.mkdir(exist_ok=True)
+    META.write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
+
+
+async def make(text: str, path: pathlib.Path, voice: str, rate: str) -> bool:
     import edge_tts
 
-    for attempt in range(4):
+    tmp = path.with_suffix(".tmp")
+    for attempt in range(1, 6):
         try:
-            await edge_tts.Communicate(text, VOICE, rate=RATE).save(str(path))
-            if path.exists() and path.stat().st_size > 500:
+            await asyncio.wait_for(
+                edge_tts.Communicate(text, voice, rate=rate).save(str(tmp)), timeout=40
+            )
+            if tmp.exists() and tmp.stat().st_size > 500:
+                os.replace(tmp, path)  # only now the old file is replaced
                 return True
-        except Exception as e:  # network hiccup, retry
-            print(f"  retry {attempt + 1} for {text!r}: {e}")
-            await asyncio.sleep(1.5 * (attempt + 1))
-    if path.exists():
-        path.unlink()
+        except Exception as e:  # network hiccup / throttling: wait and retry
+            print(f"  retry {attempt} for {text!r}: {type(e).__name__}: {e}", flush=True)
+        await asyncio.sleep(2 * attempt)
+    if tmp.exists():
+        tmp.unlink()
     return False
 
 
@@ -87,19 +112,35 @@ async def main() -> int:
         return 0
 
     OUT.mkdir(exist_ok=True)
+    meta = load_meta()
+    voice = os.environ.get("TTS_VOICE") or (meta or {}).get("voice") or DEFAULT_VOICE
+    rate = os.environ.get("TTS_RATE") or (meta or {}).get("rate") or DEFAULT_RATE
+    if FORCE or not meta or meta.get("voice") != voice or meta.get("rate") != rate:
+        meta = {"voice": voice, "rate": rate, "done": []}
+        print(f"Re-creating all files: voice={voice} rate={rate}", flush=True)
+    done = set(meta["done"])
+
     failed = []
     for i, t in enumerate(texts, 1):
-        f = OUT / f"{h32(t)}.mp3"
-        if not FORCE and f.exists() and f.stat().st_size > 500:
+        h = h32(t)
+        f = OUT / f"{h}.mp3"
+        if h in done and f.exists() and f.stat().st_size > 500:
             continue
-        ok = await make(t, f)
-        print(f"[{i}/{len(texts)}] {'ok ' if ok else 'FAIL'} {t}")
-        if not ok:
+        ok = await make(t, f, voice, rate)
+        print(f"[{i}/{len(texts)}] {'ok  ' if ok else 'FAIL'} {t}", flush=True)
+        if ok:
+            done.add(h)
+            await asyncio.sleep(0.3)
+        else:
             failed.append(t)
+        if i % 10 == 0:
+            save_meta({"voice": voice, "rate": rate, "done": sorted(done)})
+
+    save_meta({"voice": voice, "rate": rate, "done": sorted(done)})
     if failed:
-        print("Failed:", failed)
+        print(f"{len(failed)} failed (run the workflow again to retry them):", failed)
         return 1
-    print(f"Done: {len(texts)} files in {OUT}")
+    print(f"Done: {len(texts)} files, voice={voice} rate={rate}")
     return 0
 
 

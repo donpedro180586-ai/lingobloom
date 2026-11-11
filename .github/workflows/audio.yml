@@ -30,6 +30,7 @@ permissions:
 jobs:
   audio:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,6 +43,7 @@ jobs:
           TTS_RATE: ${{ inputs.rate }}
           FORCE: ${{ inputs.force }}
       - name: Commit audio files
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
