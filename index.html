@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Learn Russian</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#1d2433;--muted:#6b7385;--accent:#4f6df5;--ok:#2fa56b;--bad:#e0524f;--line:#e3e6ee}
+@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1c212c;--text:#eef0f6;--muted:#97a0b5;--line:#2b3140}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:80px}
+header{padding:20px 16px 8px}
+h1{margin:0;font-size:24px}
+.sub{color:var(--muted);font-size:14px;margin-top:4px}
+main{padding:8px 16px}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;border:0;background:none;color:var(--muted);padding:12px 4px;font-size:13px;cursor:pointer}
+.tabs button span{display:block;font-size:20px}
+.tabs button.on{color:var(--accent);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.letter{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 0;text-align:center;font-size:26px;font-weight:700;color:var(--text);cursor:pointer}
+.letter small{display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:2px}
+.letter:active{transform:scale(.96)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:20px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.word{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.word b{font-size:19px}
+.tr{color:var(--muted);font-size:13px}
+.btn{border:0;background:var(--accent);color:#fff;padding:12px 18px;border-radius:12px;font-size:16px;cursor:pointer}
+.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}
+.btn.ghost{background:none;color:var(--accent);border:1px solid var(--accent)}
+.row{display:flex;gap:10px;margin-top:12px}.row .btn{flex:1}
+.flash{text-align:center;padding:40px 16px;min-height:180px;cursor:pointer;font-size:30px;font-weight:700}
+.flash .tr{font-size:16px;font-weight:400;margin-top:8px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;cursor:pointer}
+.opt.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:8px}
+.bar div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.big{font-size:44px;font-weight:800;text-align:center}
+.center{text-align:center}
+h2{font-size:18px;margin:16px 0 4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🇷🇺 Learn Russian</h1>
+  <div class="sub" id="sub">Alphabet, words, flashcards and quiz</div>
+</header>
+<main id="view"></main>
+<nav class="tabs" id="tabs">
+  <button data-t="home" class="on"><span>🏠</span>Home</button>
+  <button data-t="alpha"><span>🔤</span>Alphabet</button>
+  <button data-t="words"><span>📚</span>Words</button>
+  <button data-t="cards"><span>🃏</span>Cards</button>
+  <button data-t="quiz"><span>🎯</span>Quiz</button>
+</nav>
+
+<script>
+// ---------- Telegram ----------
+try{ if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();} }catch(e){}
+
+// ---------- Data ----------
+const ALPHA=[
+["А а","a","арбуз","watermelon"],["Б б","b","банан","banana"],["В в","v","вода","water"],
+["Г г","g","город","city"],["Д д","d","дом","house"],["Е е","ye","еда","food"],
+["Ё ё","yo","ёж","hedgehog"],["Ж ж","zh","жук","beetle"],["З з","z","зима","winter"],
+["И и","ee","игра","game"],["Й й","y","йогурт","yogurt"],["К к","k","кот","cat"],
+["Л л","l","лампа","lamp"],["М м","m","мама","mom"],["Н н","n","нос","nose"],
+["О о","o","окно","window"],["П п","p","папа","dad"],["Р р","r","рыба","fish"],
+["С с","s","солнце","sun"],["Т т","t","телефон","phone"],["У у","oo","утро","morning"],
+["Ф ф","f","флаг","flag"],["Х х","kh","хлеб","bread"],["Ц ц","ts","цветок","flower"],
+["Ч ч","ch","чай","tea"],["Ш ш","sh","шапка","hat"],["Щ щ","shch","щётка","brush"],
+["Ъ ъ","hard sign","объект","object"],["Ы ы","i (deep)","сыр","cheese"],
+["Ь ь","soft sign","день","day"],["Э э","e","эхо","echo"],["Ю ю","yu","юг","south"],
+["Я я","ya","яблоко","apple"]
+];
+const TOPICS={
+"Greetings":[["Привет","privet","Hi"],["Здравствуйте","zdravstvuyte","Hello (formal)"],["Пока","poka","Bye"],["Спасибо","spasibo","Thank you"],["Пожалуйста","pozhaluysta","Please / You're welcome"],["Извините","izvinite","Excuse me"],["Да","da","Yes"],["Нет","nyet","No"]],
+"Food":[["хлеб","khleb","bread"],["вода","voda","water"],["молоко","molokó","milk"],["чай","chay","tea"],["кофе","kofe","coffee"],["яблоко","yabloko","apple"],["мясо","myaso","meat"],["суп","sup","soup"]],
+"Numbers":[["один","adin","one"],["два","dva","two"],["три","tri","three"],["четыре","chetyre","four"],["пять","pyat","five"],["шесть","shest","six"],["семь","sem","seven"],["восемь","vosem","eight"],["девять","devyat","nine"],["десять","desyat","ten"]],
+"Travel":[["Где?","gdye","Where?"],["вокзал","vokzal","train station"],["аэропорт","aeroport","airport"],["билет","bilyet","ticket"],["отель","otel","hotel"],["улица","ulitsa","street"],["Сколько стоит?","skolko stoit","How much?"],["Помогите!","pomogite","Help!"]]
+};
+const ALL=[];for(const t in TOPICS)TOPICS[t].forEach(w=>ALL.push({ru:w[0],tr:w[1],en:w[2],topic:t}));
+
+// ---------- Storage ----------
+function load(){try{return JSON.parse(localStorage.getItem("lr")||"{}")}catch(e){return {}}}
+function save(){try{localStorage.setItem("lr",JSON.stringify(S))}catch(e){}}
+const S=Object.assign({known:[],best:0},load());
+function isKnown(ru){return S.known.includes(ru)}
+
+// ---------- Speech ----------
+function say(text){
+  try{
+    const u=new SpeechSynthesisUtterance(text);u.lang="ru-RU";u.rate=.85;
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+// ---------- UI ----------
+const view=document.getElementById("view");
+let tab="home",topic="Greetings";
+document.getElementById("tabs").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  tab=b.dataset.t;
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+};
+function go(t){document.querySelector('[data-t="'+t+'"]').click()}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function chips(sel,fn){
+  return '<div class="chips">'+Object.keys(TOPICS).map(t=>'<button class="chip'+(t===sel?' on':'')+'" data-topic="'+t+'">'+t+'</button>').join("")+'</div>';
+}
+view.addEventListener("click",e=>{
+  const c=e.target.closest("[data-topic]");
+  if(c){topic=c.dataset.topic;render();}
+});
+
+function render(){
+  ({home,alpha,words,cards,quiz})[tab]();
+}
+
+function home(){
+  const pct=Math.round(S.known.length/ALL.length*100);
+  view.innerHTML=`
+  <div class="card"><b>Your progress</b>
+    <div class="tr">${S.known.length} of ${ALL.length} words learned</div>
+    <div class="bar"><div style="width:${pct}%"></div></div>
+    <div class="tr" style="margin-top:8px">Best quiz score: ${S.best}/10</div>
+  </div>
+  <div class="card"><b>How to use</b>
+    <div class="tr" style="margin-top:6px">1. Learn the letters in <b>Alphabet</b> (tap a letter to hear it).<br>
+    2. Read words by topic in <b>Words</b>.<br>
+    3. Memorise with <b>Cards</b>.<br>
+    4. Check yourself in the <b>Quiz</b>.</div>
+  </div>
+  <div class="row"><button class="btn" onclick="go('alpha')">Start with letters</button><button class="btn ghost" onclick="go('quiz')">Take quiz</button></div>
+  <div class="row"><button class="btn ghost" onclick="resetAll()">Reset progress</button></div>`;
+}
+function resetAll(){if(confirm("Reset all progress?")){S.known=[];S.best=0;save();render();}}
+
+function alpha(){
+  view.innerHTML='<div class="tr" style="margin:6px 0">Tap a letter to hear its example word.</div><div class="grid">'+
+  ALPHA.map((a,i)=>`<div class="letter" data-i="${i}">${a[0].split(" ")[0]}<small>${a[1]}</small></div>`).join("")+
+  '</div><div id="detail"></div>';
+  view.querySelectorAll(".letter").forEach(el=>el.onclick=()=>{
+    const a=ALPHA[el.dataset.i];
+    say(a[0].split(" ")[0]);setTimeout(()=>say(a[2]),700);
+    document.getElementById("detail").innerHTML=`<div class="card center"><div class="big">${a[0]}</div>
+      <div class="tr">sounds like “${a[1]}”</div>
+      <h2>${a[2]}</h2><div class="tr">${a[3]}</div></div>`;
+    window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+  });
+}
+
+function words(){
+  view.innerHTML=chips(topic)+TOPICS[topic].map((w,i)=>`
+  <div class="card word"><div><b>${w[0]}</b><div class="tr">${w[1]} — ${w[2]}</div></div>
+  <button class="btn" data-say="${i}">🔊</button></div>`).join("");
+  view.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>say(TOPICS[topic][b.dataset.say][0]));
+}
+
+let deck=[],di=0,flipped=false;
+function cards(){
+  if(!deck.length||deck[0].topic!==topic){deck=shuffle(ALL.filter(w=>w.topic===topic));di=0;flipped=false;}
+  const w=deck[di];
+  view.innerHTML=chips(topic)+`
+  <div class="tr center">Card ${di+1} of ${deck.length}</div>
+  <div class="card flash" id="fl">${flipped?w.en+'<div class="tr">'+w.ru+' ('+w.tr+')</div>':w.ru+'<div class="tr">tap to flip</div>'}</div>
+  <div class="row"><button class="btn ghost" id="sp">🔊 Listen</button></div>
+  <div class="row"><button class="btn bad" id="no">Repeat</button><button class="btn ok" id="yes">I know it</button></div>`;
+  document.getElementById("fl").onclick=()=>{flipped=!flipped;if(flipped===false)say(w.ru);cards();};
+  document.getElementById("sp").onclick=()=>say(w.ru);
+  const next=()=>{di++;flipped=false;if(di>=deck.length){deck=shuffle(deck);di=0;}cards();};
+  document.getElementById("yes").onclick=()=>{if(!isKnown(w.ru)){S.known.push(w.ru);save();}next();};
+  document.getElementById("no").onclick=()=>{S.known=S.known.filter(x=>x!==w.ru);save();next();};
+}
+
+let Q=null;
+function quiz(){
+  if(!Q)Q={list:shuffle(ALL).slice(0,10),i:0,score:0,done:false,answered:false};
+  if(Q.done){
+    view.innerHTML=`<div class="card center"><div class="big">${Q.score}/10</div>
+    <div class="tr">${Q.score>=8?"Great job! 🎉":Q.score>=5?"Good, keep practicing 👍":"Review the words and try again 💪"}</div></div>
+    <div class="row"><button class="btn" id="again">Try again</button></div>`;
+    document.getElementById("again").onclick=()=>{Q=null;quiz();};
+    return;
+  }
+  const w=Q.list[Q.i];
+  const opts=shuffle([w,...shuffle(ALL.filter(x=>x.ru!==w.ru)).slice(0,3)]);
+  view.innerHTML=`<div class="tr center">Question ${Q.i+1} of 10</div>
+  <div class="bar"><div style="width:${Q.i*10}%"></div></div>
+  <div class="card center"><div class="tr">What does it mean?</div><div class="big" style="font-size:34px">${w.ru}</div>
+  <button class="btn ghost" id="sp" style="margin-top:10px">🔊</button></div>
+  <div id="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${o.en}</button>`).join("")}</div>`;
+  document.getElementById("sp").onclick=()=>say(w.ru);
+  Q.answered=false;
+  view.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(Q.answered)return;Q.answered=true;
+    const pick=opts[b.dataset.k];
+    const right=pick.ru===w.ru;
+    if(right){Q.score++;b.classList.add("ok");}else{
+      b.classList.add("bad");
+      view.querySelectorAll(".opt").forEach((x,k)=>{if(opts[k].ru===w.ru)x.classList.add("ok")});
+    }
+    setTimeout(()=>{
+      Q.i++;
+      if(Q.i>=10){Q.done=true;if(Q.score>S.best){S.best=Q.score;save();}}
+      quiz();
+    },1000);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
