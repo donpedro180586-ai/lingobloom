@@ -16,8 +16,13 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "index.html"
 OUT = ROOT / "audio"
-VOICE = "ru-RU-SvetlanaNeural"   # female; alternative: ru-RU-DmitryNeural
-RATE = "-10%"                    # a bit slower, easier for learners
+import os
+
+# Female: ru-RU-SvetlanaNeural, male: ru-RU-DmitryNeural. Both can be set from the
+# "Run workflow" form on GitHub (Actions tab) via TTS_VOICE / TTS_RATE.
+VOICE = os.environ.get("TTS_VOICE") or "ru-RU-SvetlanaNeural"
+RATE = os.environ.get("TTS_RATE") or "-10%"   # slower = easier for learners
+FORCE = "--force" in sys.argv or os.environ.get("FORCE", "").lower() == "true"
 
 
 def h32(s: str) -> str:
@@ -85,7 +90,7 @@ async def main() -> int:
     failed = []
     for i, t in enumerate(texts, 1):
         f = OUT / f"{h32(t)}.mp3"
-        if f.exists() and f.stat().st_size > 500:
+        if not FORCE and f.exists() and f.stat().st_size > 500:
             continue
         ok = await make(t, f)
         print(f"[{i}/{len(texts)}] {'ok ' if ok else 'FAIL'} {t}")

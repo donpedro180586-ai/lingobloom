@@ -2,6 +2,22 @@ name: Generate word audio
 
 on:
   workflow_dispatch:
+    inputs:
+      voice:
+        description: Voice
+        type: choice
+        default: ru-RU-SvetlanaNeural
+        options:
+          - ru-RU-SvetlanaNeural
+          - ru-RU-DmitryNeural
+      rate:
+        description: "Speed (e.g. -20% slower, -10% default, +0% normal)"
+        type: string
+        default: "-10%"
+      force:
+        description: Re-create ALL files (needed after changing voice or speed)
+        type: boolean
+        default: false
   push:
     branches: [main, master]
     paths:
@@ -21,14 +37,19 @@ jobs:
           python-version: "3.12"
       - run: pip install edge-tts
       - run: python scripts/generate_audio.py
+        env:
+          TTS_VOICE: ${{ inputs.voice }}
+          TTS_RATE: ${{ inputs.rate }}
+          FORCE: ${{ inputs.force }}
       - name: Commit audio files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audio
+          git add -A audio
           if git diff --cached --quiet; then
-            echo "No new audio files"
+            echo "No audio changes"
           else
-            git commit -m "Add generated word audio"
+            git commit -m "Update word audio"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push
           fi
