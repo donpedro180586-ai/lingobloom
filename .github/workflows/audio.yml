@@ -45,6 +45,7 @@ jobs:
           TTS_VOICE: ${{ inputs.voice }}
           TTS_RATE: ${{ inputs.rate }}
           FORCE: ${{ inputs.force }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
       - name: Commit audio files
         if: always()
         run: |
