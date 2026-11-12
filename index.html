@@ -160,6 +160,41 @@ main.pgin h2::after{content:"";display:block;height:1px;width:0;background:var(-
 @keyframes fk{to{transform:scaleY(1.28) scaleX(.9)}}
 .dr{animation:dr 2s ease-in infinite}@keyframes dr{0%{opacity:0}20%{opacity:1}100%{opacity:0;margin-top:34px}}
 @media(prefers-reduced-motion:reduce){.fk,.dr{animation:none}}
+
+/* --- "Спой на английском": look of the promo video --- */
+.sg-file{display:block;text-align:center;cursor:pointer;padding:22px 16px;border:1px solid var(--line);border-radius:18px;background:var(--surface);margin:14px 0;font-size:18px;overflow-wrap:anywhere}
+.sg-file.ok{color:var(--ok);font-weight:500;border-color:rgba(127,184,154,.35)}
+.sg-file small{display:block;color:var(--muted);font-size:11px;margin-top:5px;font-weight:400}
+.sg-h{font-family:var(--serif);font-size:23px;font-weight:600;display:block}
+.wv{display:flex;align-items:flex-end;gap:3px;height:104px;margin:16px 0 8px;padding-top:12px;position:relative;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;outline:none}
+.wv i{flex:1;min-width:2px;background:#4a4843;border-radius:2px;transition:background .15s}
+.wv i.on{background:var(--g)}
+.wv .mk{position:absolute;top:0;height:3px;background:var(--g);border-radius:2px;pointer-events:none}
+.wv:focus-visible{box-shadow:0 0 0 2px var(--a)}
+.pbtns{display:flex;gap:10px;margin-top:14px}
+.pbtns .btn{flex:1;padding:13px 8px}
+.lcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 16px 12px;margin:14px 0}
+.lru{font-size:13px;color:var(--muted);margin-bottom:10px}
+.lin{display:block;width:100%;background:transparent;border:0;border-bottom:1px solid transparent;outline:0;color:var(--text);font-family:var(--sans);font-size:17px;padding:0 34px 22px 0;margin:0;border-radius:0}
+.lin:focus{border-bottom-color:var(--a)}
+.spk{position:absolute;right:12px;bottom:10px;background:none;border:0;font-size:18px;cursor:pointer;padding:4px;opacity:.85}
+.lyr .ln{text-align:center;margin:14px 0;opacity:.8;transition:opacity .25s}
+.lyr .ln .le{font-size:17px;line-height:1.3;transition:font-size .25s,color .25s}
+.lyr .ln .lr{font-size:12px;color:var(--muted);margin-top:2px}
+.lyr.live .ln{opacity:.4}
+.lyr .ln.cur{opacity:1}
+.lyr .ln.cur .le{color:var(--g);font-size:23px;font-weight:600}
+.rrow{display:flex;align-items:center;gap:8px;margin:18px 4px 8px;font-size:17px}
+.rdot{width:11px;height:11px;border-radius:50%;background:#55524c;display:inline-block}
+.rdot.on{background:var(--bad);animation:rblink 1s infinite}
+@keyframes rblink{50%{opacity:.35}}
+.mv{display:flex;align-items:flex-end;gap:4px;height:88px;margin:6px 4px 10px}
+.mv i{flex:1;border-radius:2px;background:linear-gradient(180deg,var(--g),var(--a2));height:6%;transition:height .09s linear}
+.adv{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.adv summary{cursor:pointer;color:var(--muted);font-size:13px;list-style:none;padding:4px 0}
+.adv summary::-webkit-details-marker{display:none}
+.adv summary::before{content:"＋ ";color:var(--g)}
+.adv[open] summary::before{content:"－ "}
 </style>
 </head>
 <body>
@@ -1121,7 +1156,7 @@ function songGame(){
 const SING={lang:"ru",asr:null};
 function singGame(){
   const my=VT,T=10;
-  let ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false,ic=null,mb=null;
+  let mraf=0,pan=null,man=null,fname="",peaks=null,ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false,ic=null,mb=null;
   const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const mmss=x=>Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,"0");
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1131,7 +1166,7 @@ function singGame(){
   /* the app's background music must not leak into the microphone */
   try{if(AU.ctx)AU.mus.gain.setTargetAtTime(0,AU.ctx.currentTime,.05)}catch(e){}
   const cleanup=()=>{
-    stopSrc();
+    stopSrc();cancelAnimationFrame(mraf);
     try{if(rec&&rec.state!=="inactive")rec.stop()}catch(e){}
     if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
     try{ctx&&ctx.close()}catch(e){}ctx=null;
@@ -1223,34 +1258,79 @@ function singGame(){
   };
   const play=(bs,onEnd)=>{
     stopSrc();const c=getCtx();let left=bs.length;
-    bs.forEach(([b,v])=>{const s=c.createBufferSource(),gn=c.createGain();s.buffer=b;gn.gain.value=v;s.connect(gn);gn.connect(c.destination);
+    bs.forEach(([b,v])=>{const s=c.createBufferSource(),gn=c.createGain();s.buffer=b;gn.gain.value=v;s.connect(gn);gn.connect(c.destination);try{gn.connect(playAn())}catch(e){}
       s.onended=()=>{if(srcs.includes(s)&&--left===0){srcs=[];onEnd&&onEnd()}};srcs.push(s)});
-    const t0=c.currentTime+.05;srcs.forEach(s=>s.start(t0));return t0;
+    const t0=c.currentTime+.05;srcs.forEach(s=>s.start(t0));meter();return t0;
   };
   const clock=(t0,len)=>{
-    const c=getCtx(),pb=$("#pb"),ls=view.querySelectorAll("[data-l]"),n=ls.length;
+    const c=getCtx(),pb=$("#pb"),ls=view.querySelectorAll("[data-l]"),n=ls.length,lc=view.querySelector(".lyr");
     const tick=()=>{
       if(my!==VT)return;const t=Math.max(0,c.currentTime-t0),k=Math.min(n-1,Math.floor(t/len*n));
       if(pb)pb.style.width=Math.min(100,t/len*100)+"%";
-      ls.forEach((e,i)=>{e.style.opacity=i===k?1:.35;e.style.color=i===k?"var(--g)":""});
+      ls.forEach((e,i)=>e.classList.toggle("cur",i===k));if(lc)lc.classList.add("live");
       if(t<len)raf=requestAnimationFrame(tick);
     };
     cancelAnimationFrame(raf);tick();
   };
 
+
+  /* live level bars + waveform picker (as in the promo video) */
+  const NB=30,NW=48;let lv=new Array(NB).fill(0),mt=0;
+  const playAn=()=>{if(!pan){pan=getCtx().createAnalyser();pan.fftSize=1024}return pan};
+  const lvl=a=>{const d=new Uint8Array(a.fftSize);a.getByteTimeDomainData(d);let q=0;for(let i=0;i<d.length;i++){const v=(d[i]-128)/128;q+=v*v}return Math.min(1,Math.sqrt(q/d.length)*3.2)};
+  const paint=()=>{view.querySelectorAll("#mv i").forEach((b,i)=>{b.style.height=Math.max(6,lv[i]*100)+"%"})};
+  const meter=()=>{
+    cancelAnimationFrame(mraf);
+    const loop=t=>{
+      if(my!==VT)return;
+      const recOn=rec&&rec.state==="recording",pl=srcs.length>0;
+      if(t-mt>70){mt=t;const a=recOn?man:pl?pan:null;lv.unshift(a?lvl(a):0);lv.length=NB;paint()}
+      if(recOn||pl||lv.some(x=>x>.02))mraf=requestAnimationFrame(loop);
+    };
+    mraf=requestAnimationFrame(loop);
+  };
+  const setRec=(t,on)=>{const e=$("#rt"),d=$("#rd");if(e)e.textContent=t;if(d)d.classList.toggle("on",!!on)};
+  const mkPeaks=B=>{
+    const n=B.length,c1=B.getChannelData(0),c2=B.numberOfChannels>1?B.getChannelData(1):c1,out=new Array(NW).fill(0),sz=Math.max(1,Math.floor(n/NW)),step=Math.max(1,Math.floor(sz/200));
+    for(let b=0;b<NW;b++){let m=0;const a=b*sz,e=Math.min(n,a+sz);for(let i=a;i<e;i+=step){const v=Math.max(Math.abs(c1[i]),Math.abs(c2[i]));if(v>m)m=v}out[b]=m}
+    const so=[...out].sort((x,y)=>x-y),ref=so[Math.floor(NW*.95)]||so[NW-1]||1;
+    return out.map(v=>Math.max(.08,Math.min(1,v/(ref||1))));
+  };
+  const selWave=()=>{
+    const w=$("#wv");if(!w||!buf)return;const d=buf.duration,a=st/d,b=Math.min(1,(st+T)/d);
+    w.querySelectorAll("i").forEach((e,i)=>e.classList.toggle("on",(i+1)/NW>a+1e-6&&i/NW<b-1e-6));
+    const m=$("#mk");if(m){m.style.left=a*100+"%";m.style.width=(b-a)*100+"%"}
+  };
+  const drawWave=()=>{
+    const w=$("#wv");if(!w||!buf||!peaks)return;
+    w.innerHTML=peaks.map(q=>`<i style="height:${Math.round(q*100)}%"></i>`).join("")+'<span class="mk" id="mk"></span>';
+    selWave();
+  };
+  const setSt=v=>{const mx=Math.max(0,Math.floor(buf.duration-T)),n=Math.max(0,Math.min(mx,Math.round(v)));if(n===st)return;st=n;selWave();lab();stopSrc()};
+  const wvAt=e=>{const r=$("#wv").getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*buf.duration-T/2};
+  const wvInit=()=>{
+    const w=$("#wv");if(!w)return;let down=false;
+    w.onpointerdown=e=>{if(!buf)return;down=true;try{w.setPointerCapture(e.pointerId)}catch(x){}setSt(wvAt(e));e.preventDefault()};
+    w.onpointermove=e=>{if(down&&buf)setSt(wvAt(e))};
+    const up=()=>{down=false};w.onpointerup=up;w.onpointercancel=up;
+    w.onkeydown=e=>{if(!buf)return;if(e.key==="ArrowLeft"||e.key==="ArrowDown"){setSt(st-1);e.preventDefault()}else if(e.key==="ArrowRight"||e.key==="ArrowUp"){setSt(st+1);e.preventDefault()}};
+  };
+  const fcard=(h,ok)=>{const f=$("#fcard");if(!f)return;f.classList.toggle("ok",!!ok);f.innerHTML=h};
+
   /* step 1: file, excerpt, lyrics */
   function setup(){
     view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎵 Спой на английском</h2>
     <div class="muted">Загрузи свою песню (mp3). Сайт возьмёт отрывок в 10 секунд, уберёт из него голос, переведёт слова на английский, а ты споёшь их под мелодию. Файл остаётся на твоём устройстве.</div>
-    <div class="card center"><label class="btn ghost" for="fl" style="display:block">📂 Выбрать mp3-файл</label>
-    <input id="fl" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn">Файл не выбран</div></div>
+    <label class="sg-file" for="fl" id="fcard">📂 Выбрать mp3-файл<small>до 60 МБ · файл остаётся на твоём устройстве</small></label>
+    <input id="fl" type="file" accept="audio/*,.mp3" hidden>
     <div id="after" style="display:none">
-      <div class="card"><b>Какой отрывок взять?</b><div class="muted" id="tr"></div>
-      <input type="range" id="r0" min="0" max="0" step="1" value="0" style="width:100%;accent-color:var(--a);margin:10px 0">
-      <div class="row"><button class="btn ghost" id="p1">▶ Оригинал</button><button class="btn ghost" id="p2">▶ Без голоса</button><button class="btn ghost" id="p0" style="flex:none">■</button></div>
+      <div class="card"><b class="sg-h">Какой отрывок взять?</b><div class="muted" id="tr"></div>
+      <div class="wv" id="wv" tabindex="0" role="slider" aria-label="Начало отрывка"></div>
+      <div class="note" style="text-align:left;margin:0">Нажми на волну или проведи по ней, чтобы выбрать место.</div>
+      <div class="pbtns"><button class="btn ghost" id="p1">▶ Оригинал</button><button class="btn ghost" id="p2">▶ Без голоса</button><button class="btn ghost" id="p0" style="flex:none;width:52px">■</button></div>
       <div class="note" id="pn">Без голоса работает на стерео-треках, где голос звучит по центру.</div>
-      <div class="note" style="margin-top:10px">Если голос всё равно слышен, возьми «минусовку» этой же песни (mp3 без голоса, её делают сайты вроде vocalremover.org или Ultimate Vocal Remover) и загрузи сюда. Она должна быть той же длины, что и оригинал.</div>
-      <label class="btn ghost" for="fl2" style="display:block;margin-top:8px">🎼 Загрузить минусовку</label><input id="fl2" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn2">${mb?"✔ минусовка загружена":"Минусовка не выбрана"}</div></div>
+      <details class="adv"${mb?" open":""}><summary>Голос слышно? Загрузить минусовку</summary><div class="note">Если голос всё равно слышен, возьми «минусовку» этой же песни (mp3 без голоса, её делают сайты вроде vocalremover.org или Ultimate Vocal Remover) и загрузи сюда. Она должна быть той же длины, что и оригинал.</div>
+      <label class="btn ghost" for="fl2" style="display:block;margin-top:8px">🎼 Загрузить минусовку</label><input id="fl2" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn2">${mb?"✔ минусовка загружена":"Минусовка не выбрана"}</div></details></div>
       <div class="muted">На каком языке песня?</div>
       <div class="chips"><button class="chip${SING.lang==="ru"?" on":""}" data-ln="ru">🇷🇺 Русский</button><button class="chip${SING.lang==="en"?" on":""}" data-ln="en">🇬🇧 English</button></div>
       <div class="muted" style="margin-top:8px">Слова этого отрывка</div>
@@ -1271,7 +1351,7 @@ function singGame(){
       ic=null;$("#fn2").textContent="✔ "+f.name+(buf&&Math.abs(mb.duration-buf.duration)>3?" (длина отличается от оригинала на "+Math.round(Math.abs(mb.duration-buf.duration))+" с, отрывок может не совпасть)":"");SFX.ok();
     };
     view.querySelectorAll("[data-ln]").forEach(b=>b.onclick=()=>{SING.lang=b.dataset.ln;view.querySelectorAll("[data-ln]").forEach(x=>x.classList.toggle("on",x===b));SFX.tap()});
-    $("#r0").oninput=e=>{st=+e.target.value;lab();stopSrc()};
+    wvInit();
     $("#p0").onclick=()=>stopSrc();
     $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
     $("#p2").onclick=()=>{if(!buf)return;$("#pn").textContent="Убираю голос…";stopSrc();setTimeout(()=>{if(my!==VT||!buf)return;const k=instrC();$("#pn").textContent=k.own?"Играет твоя минусовка.":k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])},40)};
@@ -1281,12 +1361,12 @@ function singGame(){
   const lab=()=>{$("#tr").textContent="Отрывок: "+mmss(st)+" – "+mmss(Math.min(buf.duration,st+T))+" (всего "+mmss(buf.duration)+")"};
   async function loadFile(f){
     if(f.size>60e6){toast("Файл больше 60 МБ, возьми поменьше");return}
-    $("#fn").textContent="Открываю «"+f.name+"»…";stopSrc();
-    try{buf=await decode(await f.arrayBuffer())}catch(e){buf=null;$("#fn").textContent="Не получилось открыть файл. Попробуй другой mp3.";return}
+    fcard("Открываю «"+esc(f.name)+"»…<small>подожди несколько секунд</small>",false);stopSrc();
+    try{buf=await decode(await f.arrayBuffer())}catch(e){buf=null;peaks=null;fcard("Не получилось открыть файл<small>Попробуй другой mp3. Нажми, чтобы выбрать файл</small>",false);return}
     if(my!==VT)return;
-    st=0;ic=null;$("#fn").textContent="✔ "+f.name;
-    $("#r0").max=Math.max(0,Math.floor(buf.duration-T));$("#r0").value=0;lab();
-    $("#after").style.display="block";SFX.ok();
+    st=0;ic=null;fname=f.name;peaks=mkPeaks(buf);
+    fcard("✓ "+esc(fname)+"<small>нажми, чтобы выбрать другой файл</small>",true);
+    drawWave();lab();$("#after").style.display="block";SFX.ok();
   }
   const tmo=(p,ms,what)=>new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error("долго нет ответа: "+what)),ms);Promise.resolve(p).then(v=>{clearTimeout(t);res(v)},e=>{clearTimeout(t);rej(e)})});
   async function autoLyrics(){
@@ -1353,9 +1433,9 @@ function singGame(){
   function review(list,bad){
     view.innerHTML=`<button class="back" id="bk">← Назад</button><h2>Английский текст</h2>
     <div class="muted">${bad?"⚠️ Не все строки перевелись (нет интернета или закончился лимит). Допиши их сам. ":""}Машинный перевод может ошибаться, поэтому поправь его. Эти слова ты будешь петь.</div>`
-    +list.map((x,i)=>`<div class="card"><div class="muted">${esc(x.ru)}</div><div class="between"><input class="search" data-i="${i}" value="${esc(x.en)}" placeholder="English…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="icon" data-s="${i}">🔊</button></div></div>`).join("")
-    +`<div class="row"><button class="btn" id="st2">К пению 🎤</button></div>`;
-    $("#bk").onclick=()=>{setup();if(buf){$("#after").style.display="block";$("#fn").textContent="✔ файл загружен";$("#r0").max=Math.max(0,Math.floor(buf.duration-T));$("#r0").value=st;lab()}};
+    +list.map((x,i)=>`<div class="lcard"><div class="lru">${esc(x.ru)||"…"}</div><input class="lin" data-i="${i}" value="${esc(x.en)}" placeholder="English…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="spk" data-s="${i}" aria-label="Послушать">🔊</button></div>`).join("")
+    +`<div class="row"><button class="btn" id="st2" style="padding:19px;font-size:18px;font-family:var(--serif);font-weight:700">К пению →</button></div>`;
+    $("#bk").onclick=()=>{setup();if(buf){fcard("✓ "+esc(fname)+"<small>нажми, чтобы выбрать другой файл</small>",true);$("#after").style.display="block";drawWave();lab()}};
     view.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const v=view.querySelector('input[data-i="'+b.dataset.s+'"]').value.trim();if(v)say(v)});
     $("#st2").onclick=()=>{
       const en=[...view.querySelectorAll("input[data-i]")].map(i=>i.value.trim());
@@ -1365,15 +1445,18 @@ function singGame(){
   }
   /* step 3: sing over the instrumental */
   function sing(){
-    const sg=seg(),k=instrC(),len=sg.duration;ib=k.buf;
-    view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎤 Твой выход</h2>
+    const sg=seg(),k=instrC(),len=sg.duration;ib=k.buf;lv=new Array(NB).fill(0);
+    view.innerHTML=`<button class="back" id="bk">← Игры</button>
     <div class="tip">🎧 Надень наушники, иначе микрофон запишет мелодию из динамика. ${k.ok?"Мелодия играет без голоса.":"В этом файле голос не отделить, поэтому играет оригинал: старайся петь громче него."}</div>
-    <div class="card center">${items.map((x,i)=>`<div data-l="${i}" style="margin:10px 0;opacity:.6"><div class="en2" style="font-size:21px;margin:0">${esc(x.en)}</div><div class="muted">${esc(x.ru)}</div></div>`).join("")}
-    <div class="bar"><div id="pb" style="width:0%"></div></div><div class="en2" id="cd" style="min-height:44px"></div></div>
+    <div class="card lyr">${items.map((x,i)=>`<div class="ln" data-l="${i}"><div class="le">${esc(x.en)}</div><div class="lr">${esc(x.ru)}</div></div>`).join("")}
+    <div class="bar"><div id="pb" style="width:0%"></div></div></div>
+    <div class="rrow"><span class="rdot" id="rd"></span><span>🎤</span><b id="rt" style="font-weight:500">Готов к записи</b></div>
+    <div class="mv" id="mv">${"<i></i>".repeat(NB)}</div>
+    <div class="en2" id="cd" style="min-height:44px;text-align:center"></div>
     <div class="row"><button class="btn ghost" id="rh">▶ Репетиция</button><button class="btn" id="rc">🔴 Записать</button></div>
     <div id="res"></div>`;
     $("#bk").onclick=Play;
-    $("#rh").onclick=()=>{if(busy)return;const t0=play([[ib,1]],()=>{});clock(t0,len)};
+    $("#rh").onclick=()=>{if(busy)return;setRec("Репетиция",false);const t0=play([[ib,1]],()=>setRec("Готов к записи",false));clock(t0,len)};
     $("#rc").onclick=()=>record(len);
   }
   async function record(len){
@@ -1383,6 +1466,7 @@ function singGame(){
     try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
     catch(e){busy=false;toast("Нет доступа к микрофону. Разреши его для приложения.");return}
     if(my!==VT)return;
+    try{const c=getCtx();man=c.createAnalyser();man.fftSize=1024;c.createMediaStreamSource(stream).connect(man)}catch(e){man=null}
     for(const n of ["3","2","1"]){$("#cd").textContent=n;SFX.tap();await wait(800);if(my!==VT)return}
     $("#cd").textContent="🎶 Пой!";
     const mime=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg"].find(m=>MediaRecorder.isTypeSupported(m))||"",chunks=[];
@@ -1392,9 +1476,9 @@ function singGame(){
       if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
       if(my!==VT)return;
       recBlob=new Blob(chunks,{type:rec.mimeType||mime||"audio/webm"});
-      if(recUrl)URL.revokeObjectURL(recUrl);recUrl=URL.createObjectURL(recBlob);busy=false;done();
+      if(recUrl)URL.revokeObjectURL(recUrl);recUrl=URL.createObjectURL(recBlob);busy=false;setRec("Записано",false);done();
     };
-    rec.start();
+    rec.start();setRec("Запись",true);meter();
     const t0=play([[ib,1]],()=>setTimeout(()=>{try{if(rec.state!=="inactive")rec.stop()}catch(e){}},500));clock(t0,len);
   }
   function done(){
