@@ -132,10 +132,10 @@ nav button.on{color:var(--g);background:var(--gt)}
 .tip{background:var(--gt);border-left:2px solid var(--a);border-radius:4px 14px 14px 4px;padding:12px 16px;font-size:14px;margin:12px 0;line-height:1.5}
 .note{font-size:12px;color:var(--muted);text-align:center;margin:8px 0;line-height:1.5}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
-main.sw>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) backwards}
-main.sw>*:nth-child(2){animation-delay:.05s}main.sw>*:nth-child(3){animation-delay:.1s}main.sw>*:nth-child(4){animation-delay:.15s}main.sw>*:nth-child(5){animation-delay:.2s}main.sw>*:nth-child(6){animation-delay:.25s}main.sw>*:nth-child(n+7){animation-delay:.3s}
-@media(prefers-reduced-motion:reduce){main.sw>*{animation:none}}
-main.sw h2::after{content:"";display:block;height:1px;width:0;background:var(--a);margin-top:8px;animation:ln .8s .2s cubic-bezier(.2,.8,.2,1) forwards}
+main.pgin>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) backwards}
+main.pgin>*:nth-child(2){animation-delay:.05s}main.pgin>*:nth-child(3){animation-delay:.1s}main.pgin>*:nth-child(4){animation-delay:.15s}main.pgin>*:nth-child(5){animation-delay:.2s}main.pgin>*:nth-child(6){animation-delay:.25s}main.pgin>*:nth-child(n+7){animation-delay:.3s}
+@media(prefers-reduced-motion:reduce){main.pgin>*{animation:none}}
+main.pgin h2::after{content:"";display:block;height:1px;width:0;background:var(--a);margin-top:8px;animation:ln .8s .2s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes ln{to{width:48px}}
 </style>
 </head>
@@ -846,7 +846,7 @@ function Me(){
 }
 
 hud();render();
-new MutationObserver(()=>{view.classList.remove("sw");void view.offsetWidth;view.classList.add("sw")}).observe(view,{childList:true});
+new MutationObserver(()=>{view.classList.remove("pgin");void view.offsetWidth;view.classList.add("pgin")}).observe(view,{childList:true});
 </script>
 </body>
 </html>
