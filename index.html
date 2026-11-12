@@ -1306,12 +1306,20 @@ function singGame(){
         }
         if(!tf)throw err||new Error("не загрузилась библиотека");
         try{tf.env.allowLocalModels=false;tf.env.useBrowserCache=true}catch(e){}
-        say2("Скачиваю модель (около 40 МБ)");
-        SING.asr=await tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{device:"wasm",progress_callback:p=>{
+        try{const w=tf.env.backends.onnx.wasm;w.numThreads=1;w.proxy=false}catch(e){}
+        say2("Скачиваю модель (около 40 МБ)");const fl={};
+        const mk=()=>tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{device:"wasm",progress_callback:p=>{
           if(my!==VT||!p)return;
-          if(p.status==="progress"&&p.progress!=null)say2("Скачиваю модель: "+Math.round(p.progress)+"%");
-          else if(p.status==="ready")say2("Модель готова");
+          if(p.file){
+            const f=fl[p.file]||(fl[p.file]={l:0,t:0});
+            if(p.status==="progress"){f.l=p.loaded||0;f.t=p.total||f.t}
+            else if(p.status==="done")f.l=f.t=Math.max(f.l,f.t);
+          }
+          const v=Object.values(fl),L=v.reduce((a,f)=>a+f.l,0),Tt=v.reduce((a,f)=>a+f.t,0);
+          if(p.status==="ready"||(Tt>2e7&&L>=Tt-1))say2("Запускаю модель (до минуты, это нормально)");
+          else if(Tt>0)say2("Скачиваю модель: "+Math.round(L/1e6)+" из "+Math.round(Tt/1e6)+" МБ");
         }}),300000,"скачивание модели");
+        try{SING.asr=await mk()}catch(e1){say2("Первая попытка не вышла, пробую ещё раз");console.error(e1);SING.asr=await mk()}
       }
       say2("Слушаю отрывок");
       const out=await tmo(SING.asr(pcm,{language:SING.lang==="ru"?"russian":"english",task:"transcribe"}),150000,"распознавание");
@@ -1321,7 +1329,7 @@ function singGame(){
       if(tx){$("#ly").value=tx;note.textContent="Готово. Прочитай и поправь слова, если нужно."}else note.textContent="Слова не распознались. Впиши их вручную."
     }catch(e){
       clearInterval(tick);
-      if(my===VT){const m=String((e&&e.message)||e);note.textContent=/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(m)?"Не удалось выйти в интернет из этого окна. В предпросмотре claude.ai внешние сайты заблокированы: распознавание заработает, когда сайт открыт с твоего хостинга. А пока впиши слова вручную.":"Распознать не вышло (этап: "+stage.split(" · ")[0]+"; "+m.slice(0,100)+"). Впиши слова вручную."}
+      if(my===VT){console.error(e);const m=String((e&&e.message)||e),st2=stage.split(" · ")[0],net=/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(m),pv=/claude|anthropic/i.test(location.hostname);note.textContent=net?(pv?"Из предпросмотра claude.ai нельзя выйти в интернет. Открой сайт со своего хостинга. А пока впиши слова вручную.":"Ошибка сети на этапе «"+st2+"»: "+m.slice(0,80)+". Проверь, что открываются cdn.jsdelivr.net и huggingface.co (с VPN или без), и нажми ещё раз: скачанное уже сохранено в браузере. А пока можно вписать слова вручную."):"Распознать не вышло (этап: "+st2+"; "+m.slice(0,100)+"). Впиши слова вручную."}
     }
     clearInterval(tick);busy=false;if($("#as"))$("#as").disabled=false;
     return tx;
