@@ -610,6 +610,11 @@ function answer(ok){
 }
 
 /* ================= UI CORE ================= */
+/* ---- visitor stats: free GoatCounter (no cookies, no personal data). Put your site code below, e.g. code:"lingobloom" ---- */
+const STATS={code:"lingobloom",admins:[]};
+function stat(name,title){try{if(STATS.code&&window.goatcounter&&goatcounter.count)goatcounter.count({path:name,title:title||name,event:true})}catch(e){}}
+if(STATS.code){const g=document.createElement("script");g.async=true;g.src="https://gc.zgo.at/count.js";g.dataset.goatcounter="https://"+STATS.code+".goatcounter.com/count";
+  g.onload=()=>{try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)stat("tg-open","Открыли в Telegram")}catch(e){}};document.head.appendChild(g)}
 const view=$("#view");
 let VT=0;
 const nav=()=>{VT++};
@@ -623,7 +628,27 @@ $("#tabs").onclick=e=>{
   render();
 };
 function go(t){document.querySelector('[data-t="'+t+'"]').click()}
-function render(){nav();({home:Home,learn:Learn,alpha:Alpha,words:Words,play:Play,me:Me})[tab]();window.scrollTo(0,0)}
+function Admin(){
+  const C=STATS.code,T=window.Telegram&&Telegram.WebApp,u=T&&T.initDataUnsafe&&T.initDataUnsafe.user;
+  if(STATS.admins.length&&u&&!STATS.admins.includes(u.id)){toast("Нет доступа");tab="me";render();return}
+  const R=[["👥","Визиты на сайт",location.pathname],["✈️","Открыли в Telegram","tg-open"],["📘","Уроков пройдено","lesson-done"],["🎮","Игр сыграно","game-played"]],skip=localStorage.getItem("skipgc")==="t";
+  view.innerHTML=`<button class="back" id="ab">← Назад</button><h2>📊 Админ-панель</h2>`+(C?`
+    <div class="muted">Данные из GoatCounter (${esc(C)}). Он не использует cookies и не хранит личные данные.</div>
+    ${R.map((r,i)=>`<div class="card between"><span>${r[0]} ${r[1]}</span><b class="en2" id="ac${i}" style="margin:0">…</b></div>`).join("")}
+    <div class="row"><button class="btn" id="aa">🔗 Полная статистика</button><button class="btn ghost" id="ar">↻ Обновить</button></div>
+    <div class="card between"><span>Не считать мои визиты на этом устройстве</span><button class="sw${skip?" on":""}" id="as1"></button></div>`
+  :`<div class="card"><b>Статистика ещё не подключена</b>
+    <div class="note" style="text-align:left">1. Зайди на goatcounter.com и создай бесплатный сайт (придумай код, например lingobloom).<br>2. В Settings → Site включи «Allow adding visitor counts on your website».<br>3. В index.html найди <b>const STATS={code:""</b> и впиши свой код между кавычками.<br>4. Загрузи файл на GitHub и открой эту панель снова.</div></div>`)
+  +`<div class="note">${u?"Твой Telegram ID: "+u.id:"Telegram ID виден, если открыть сайт внутри Telegram"}</div>`;
+  $("#ab").onclick=()=>{tab="me";render()};
+  if(!C)return;
+  const load=()=>R.forEach(async(r,i)=>{const el=$("#ac"+i);try{const q=await fetch("https://"+C+".goatcounter.com/counter/"+encodeURIComponent(r[2])+".json");if(q.status===404){el.textContent="0";return}
+    const j=await q.json();el.textContent=j.count_unique&&j.count_unique!==j.count?j.count+" ("+j.count_unique+" уник.)":j.count}catch(e){el.textContent="—"}});
+  load();$("#ar").onclick=()=>{R.forEach((r,i)=>$("#ac"+i).textContent="…");load()};
+  $("#aa").onclick=()=>{const url="https://"+C+".goatcounter.com";T&&T.openLink?T.openLink(url):window.open(url,"_blank","noopener")};
+  $("#as1").onclick=e=>{const on=localStorage.getItem("skipgc")!=="t";on?localStorage.setItem("skipgc","t"):localStorage.removeItem("skipgc");e.currentTarget.classList.toggle("on",on)};
+}
+function render(){nav();({home:Home,learn:Learn,alpha:Alpha,words:Words,play:Play,me:Me,admin:Admin})[tab]();window.scrollTo(0,0)}
 function chips(star){
   const ids=["All",...Object.keys(TOPICS).filter(t=>!HID.includes(t))];if(star)ids.push("★");
   return '<div class="chips">'+ids.map(t=>'<button class="chip'+(t===topic?' on':'')+'" data-topic="'+t+'">'+(t==="All"?"Все":t==="★"?"★ Избранное":TOPICS[t].title)+'</button>').join("")+'</div>';
@@ -776,7 +801,7 @@ function choiceGame(id,title,items,make){
   }
   step();
 }
-function finish(id,title,score,max){
+function finish(id,title,score,max){stat("game-played","Игра сыграна");
   const ratio=score/max;
   if(S.bests[id]==null||score>S.bests[id])S.bests[id]=score;
   if(score===max)S.flags.perfect=1;
@@ -1865,7 +1890,7 @@ function lessonEnd(){
   const stars=pct>=.95?3:pct>=.8?2:1;let first=false;
   if(pass){
     const old=S.lessons[l.id];first=!old;
-    S.lessons[l.id]={stars:Math.max(stars,old?old.stars:0)};
+    S.lessons[l.id]={stars:Math.max(stars,old?old.stars:0)};stat("lesson-done","Урок пройден");
     LS.items.forEach(it=>{if(it.k==="w"&&!S.known.includes(it.en))S.known.push(it.en)});
     gainXP(15+LS.right*3+(first?30:0));
     if(stars>=2){SFX.level();confetti()}else SFX.ok();
@@ -1929,6 +1954,7 @@ function Me(){
 
 hud();render();
 new MutationObserver(()=>{view.classList.remove("pgin");void view.offsetWidth;view.classList.add("pgin")}).observe(view,{childList:true});
+{let n=0,t0=0;document.querySelector(".logo").addEventListener("click",()=>{const now=Date.now();n=now-t0>3000?1:n+1;t0=now;if(n>=7){n=0;tab="admin";redraw=null;SFX.pop();render()}})}
 </script>
 </body>
 </html>
