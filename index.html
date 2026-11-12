@@ -1174,7 +1174,7 @@ function songGame(){
 }
 
 /* ---- sing: upload an mp3, cut 10 s, remove the voice, sing it in English ---- */
-const SING={lang:"ru",asr:null,q:"base",asrQ:null};
+const SING={lang:"ru",asr:null,q:"base",asrQ:null,mv:1,mm:.7};
 function singGame(){
   const my=VT,T=10;
   let mraf=0,pan=null,man=null,fname="",peaks=null,ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false,ic=null,mb=null;
@@ -1287,8 +1287,8 @@ function singGame(){
     return ic.r;
   };
   const play=(bs,onEnd)=>{
-    stopSrc();const c=getCtx();let left=bs.length;
-    bs.forEach(([b,v])=>{const s=c.createBufferSource(),gn=c.createGain();s.buffer=b;gn.gain.value=v;s.connect(gn);gn.connect(c.destination);try{gn.connect(playAn())}catch(e){}
+    stopSrc();const c=getCtx();let left=bs.length;const gl=[];lastG=gl;
+    bs.forEach(([b,v])=>{const s=c.createBufferSource(),gn=c.createGain();s.buffer=b;gn.gain.value=v;gl.push(gn);s.connect(gn);gn.connect(c.destination);try{gn.connect(playAn())}catch(e){}
       s.onended=()=>{if(srcs.includes(s)&&--left===0){srcs=[];onEnd&&onEnd()}};srcs.push(s)});
     const t0=c.currentTime+.05;srcs.forEach(s=>s.start(t0));meter();return t0;
   };
@@ -1594,7 +1594,7 @@ function singGame(){
     return tx;
   }
   /* ---- exact words from a time-synced lyrics database (lrclib.net): lines that fall inside the chosen seconds ---- */
-  let lrc=null,lrcOff=0,lrcC=[],lrcI=0;
+  let lrc=null,lrcOff=0,lrcC=[],lrcI=0,lastG=[],mixG=null;
   const parseLrc=t=>{
     const o=[];
     for(const ln of String(t||"").split(/\r?\n/)){
@@ -1727,12 +1727,42 @@ function singGame(){
     const first=!SING.got;SING.got=1;S.sung=(S.sung||0)+1;touchDay();gainXP(first?25:10);save();SFX.ok();confetti(60);
     const ext=/mp4/.test(recBlob.type)?"m4a":/ogg/.test(recBlob.type)?"ogg":"webm";
     $("#res").innerHTML=`<div class="card center"><div class="muted">Твоя запись</div><audio controls src="${recUrl}" style="width:100%;margin-top:8px"></audio>
+      <div class="card" style="margin:12px 0 0;text-align:left"><b class="sg-h">Громкость</b>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px"><span style="width:96px">🎤 Мой голос</span><input type="range" id="vv" min="0" max="200" step="5" value="${Math.round(SING.mv*100)}" style="flex:1;min-width:0"><b id="vvl" style="width:48px;text-align:right">${Math.round(SING.mv*100)}%</b></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px"><span style="width:96px">🎼 Мелодия</span><input type="range" id="vm" min="0" max="150" step="5" value="${Math.round(SING.mm*100)}" style="flex:1;min-width:0"><b id="vml" style="width:48px;text-align:right">${Math.round(SING.mm*100)}%</b></div>
+        <div class="note" style="text-align:left;margin-top:8px">Двигай ползунки, пока играет микс: громкость меняется сразу.</div></div>
       <div class="row"><button class="btn gold" id="mx">🎧 Вместе с мелодией</button></div>
-      <div class="row"><button class="btn ghost" id="re">🔁 Ещё дубль</button><a class="btn ghost" href="${recUrl}" download="my-english-cover.${ext}" style="text-align:center;text-decoration:none">💾 Скачать</a></div></div>`;
+      <div class="row"><button class="btn ghost" id="mxs">💾 Скачать с мелодией</button></div>
+      <div class="row"><button class="btn ghost" id="re">🔁 Ещё дубль</button><a class="btn ghost" href="${recUrl}" download="my-english-cover.${ext}" style="text-align:center;text-decoration:none">💾 Только голос</a></div></div>`;
     $("#re").onclick=()=>{$("#res").innerHTML="";$("#cd").textContent="";$("#pb").style.width="0%";record(ib.duration)};
+    const lv2=()=>{
+      $("#vvl").textContent=Math.round(SING.mv*100)+"%";$("#vml").textContent=Math.round(SING.mm*100)+"%";
+      if(mixG&&mixG.length===2){const c=getCtx().currentTime;try{mixG[0].gain.setTargetAtTime(SING.mm,c,.02);mixG[1].gain.setTargetAtTime(SING.mv,c,.02)}catch(e){}}
+    };
+    $("#vv").oninput=e=>{SING.mv=+e.target.value/100;lv2()};
+    $("#vm").oninput=e=>{SING.mm=+e.target.value/100;lv2()};
+    let rbC=null;
+    const getRb=async()=>rbC||(rbC=await decode(await recBlob.arrayBuffer()));
     $("#mx").onclick=async()=>{
-      try{const rb=await decode(await recBlob.arrayBuffer());const t0=play([[ib,.7],[rb,1]]);clock(t0,ib.duration)}
-      catch(e){toast("Не получилось смешать. Послушай запись выше.")}
+      try{const rb=await getRb();const t0=play([[ib,SING.mm],[rb,SING.mv]]);mixG=lastG;clock(t0,ib.duration)}
+      catch(e){rbC=null;toast("Не получилось смешать. Послушай запись выше.")}
+    };
+    /* render the mix with the chosen levels into a WAV file */
+    $("#mxs").onclick=async()=>{
+      const b=$("#mxs");b.disabled=true;const old=b.textContent;b.textContent="Собираю…";
+      try{
+        const rb=await getRb(),OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,sr=ib.sampleRate,oc=new OC(2,Math.ceil(ib.duration*sr),sr);
+        const cp=oc.createDynamicsCompressor();cp.threshold.value=-4;cp.knee.value=3;cp.ratio.value=14;cp.attack.value=.003;cp.release.value=.15;cp.connect(oc.destination);
+        [[ib,SING.mm],[rb,SING.mv]].forEach(([bf,v])=>{const sr2=oc.createBufferSource(),g=oc.createGain();sr2.buffer=bf;g.gain.value=v;sr2.connect(g);g.connect(cp);sr2.start()});
+        const out=await oc.startRendering(),n=out.length,ch=out.numberOfChannels,ab=new ArrayBuffer(44+n*ch*2),v=new DataView(ab),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+        w(0,"RIFF");v.setUint32(4,36+n*ch*2,true);w(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,ch,true);v.setUint32(24,sr,true);v.setUint32(28,sr*ch*2,true);v.setUint16(32,ch*2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,n*ch*2,true);
+        const d=[];for(let c=0;c<ch;c++)d.push(out.getChannelData(c));let o=44;
+        for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const x=Math.max(-1,Math.min(1,d[c][i]));v.setInt16(o,x<0?x*32768:x*32767,true);o+=2}
+        const url=URL.createObjectURL(new Blob([ab],{type:"audio/wav"})),a=document.createElement("a");
+        a.href=url;a.download="my-english-cover-mix.wav";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+        SFX.ok();
+      }catch(e){console.error(e);toast("Не получилось собрать файл. Скачай «Только голос».")}
+      b.disabled=false;b.textContent=old;
     };
   }
   setup();
