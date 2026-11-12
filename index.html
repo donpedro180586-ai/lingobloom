@@ -144,6 +144,22 @@ main.pgin h2::after{content:"";display:block;height:1px;width:0;background:var(-
 .mmbox{background:var(--surface);border:1px solid var(--line2);border-radius:20px;max-width:400px;width:100%;max-height:92vh;overflow:auto;padding:14px}
 .tile.w{width:auto;min-width:44px;height:44px;padding:0 12px;font-family:var(--sans);font-size:16px}
 .wl{min-height:56px;align-items:center;border-bottom:1px dashed var(--line2)}
+.mbtn{position:relative}
+#hDot{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--bad);border:2px solid var(--bg);display:none}
+#hMeme{border-color:rgba(200,169,106,.4)}
+.fl{animation:fl 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fl{50%{transform:translateY(-6px) rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){.fl{animation:none}}
+.mban{margin:4px 0 14px;border-radius:18px;overflow:hidden;border:1px solid rgba(200,169,106,.35);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);transition:transform .12s}.mban:active{transform:scale(.985)}.mban svg{display:block;width:100%;height:auto}
+.pl{animation:pl 2.6s ease-out infinite;transform-box:fill-box;transform-origin:center}.pl2{animation-delay:.9s}.pl3{animation-delay:1.8s}
+@keyframes pl{0%{opacity:.9;transform:scale(.7)}100%{opacity:0;transform:scale(1.3)}}
+.fy{animation:fy 3s ease-in-out infinite}@keyframes fy{50%{transform:translateY(-10px)}}
+.sp{animation:sp 40s linear infinite;transform-box:fill-box;transform-origin:center}@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pl,.fy,.sp{animation:none}}
+.fk{animation:fk .9s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes fk{to{transform:scaleY(1.28) scaleX(.9)}}
+.dr{animation:dr 2s ease-in infinite}@keyframes dr{0%{opacity:0}20%{opacity:1}100%{opacity:0;margin-top:34px}}
+@media(prefers-reduced-motion:reduce){.fk,.dr{animation:none}}
 </style>
 </head>
 <body>
@@ -169,7 +185,7 @@ main.pgin h2::after{content:"";display:block;height:1px;width:0;background:var(-
   <button data-t="me"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></span>Профиль</button>
 </nav>
 
-<script id="data" type="application/json">{"alpha":[["A a","эй","Ay","apple","яблоко"],["B b","би","Bee","book","книга"],["C c","си","See","cat","кот"],["D d","ди","Dee","dog","собака"],["E e","и","Ee","egg","яйцо"],["F f","эф","Eff","fish","рыба"],["G g","джи","Gee","green","зелёный"],["H h","эйч","Aitch","house","дом"],["I i","ай","Eye","ice","лёд"],["J j","джей","Jay","juice","сок"],["K k","кей","Kay","key","ключ"],["L l","эл","El","lemon","лимон"],["M m","эм","Em","milk","молоко"],["N n","эн","En","nose","нос"],["O o","оу","Oh","orange","апельсин"],["P p","пи","Pee","pen","ручка"],["Q q","кью","Cue","queen","королева"],["R r","ар","Are","red","красный"],["S s","эс","Ess","sun","солнце"],["T t","ти","Tee","tea","чай"],["U u","ю","You","umbrella","зонт"],["V v","ви","Vee","van","фургон"],["W w","дабл-ю","Double you","water","вода"],["X x","икс","Ex","box","коробка"],["Y y","уай","Why","yes","да"],["Z z","зи","Zee","zebra","зебра"]],"topics":{"greet":{"title":"Приветствия","words":[["Hello","хэллоу","Привет"],["Goodbye","гудбай","До свидания"],["Please","плиз","Пожалуйста"],["Thank you","сэнк ю","Спасибо"],["Sorry","сорри","Извините"],["Yes","йес","Да"],["No","ноу","Нет"],["Good morning","гуд морнинг","Доброе утро"]]},"intro":{"title":"О себе","words":[["My name is","май нэйм из","Меня зовут"],["How are you?","хау ар ю","Как дела?"],["Fine","файн","Хорошо"],["I","ай","Я"],["You","ю","Ты / Вы"],["Friend","фрэнд","Друг"],["Mother","мазэр","Мама"],["Father","фазэр","Папа"]]},"numbers":{"title":"Числа","words":[["one","уан","один"],["two","ту","два"],["three","сри","три"],["four","фор","четыре"],["five","файв","пять"],["six","сикс","шесть"],["seven","сэвэн","семь"],["eight","эйт","восемь"],["nine","найн","девять"],["ten","тэн","десять"]]},"food":{"title":"Еда","words":[["bread","брэд","хлеб"],["water","вотэр","вода"],["milk","милк","молоко"],["tea","ти","чай"],["coffee","кофи","кофе"],["apple","эпл","яблоко"],["meat","мит","мясо"],["soup","суп","суп"]]},"travel":{"title":"Путешествие","words":[["Where?","уэр","Где?"],["station","стэйшн","вокзал"],["airport","эйрпорт","аэропорт"],["ticket","тикит","билет"],["hotel","хоутэл","отель"],["street","стрит","улица"],["How much?","хау мач","Сколько стоит?"],["Help!","хэлп","Помогите!"]]},"memes":{"title":"Мемы 🔥","words":[["6-7","сикс-сэвен","мемное число без смысла"],["skibidi","скибиди","мемное слово без смысла"],["rizz","риз","харизма, умение нравиться"],["aura","ора","личная харизма"],["lock in","лок ин","собраться и сосредоточиться"],["crash out","краш аут","сорваться, психануть"],["slop","слоп","ИИ-шлак"],["cooked","кукт","мне конец"],["mid","мид","так себе"],["yapping","япинг","болтать без умолку"],["goated","гоутид","легендарный, лучший"],["delulu","делулу","живёт в мечтах"],["no cap","ноу кэп","без обмана, честно"],["brainrot","брейнрот","мозг сгнил от мемов"],["touch grass","тач грэс","выйди из интернета"],["it's giving","итс гивинг","выглядит как; вайб"],["NPC","эн-пи-си","человек как бот"],["Chat, is this real?","чат из зис риал","Чат, это реально?"],["aura farming","ора фармин","красиво «качать ауру»"],["vibe coding","вайб кодинг","делать программы, просто объясняя ИИ"],["ragebait","рэйджбэйт","контент, чтобы тебя разозлить"],["doomscrolling","думскроллинг","бесконечно листать ленту"],["glow up","глоу ап","крутое преображение"],["side quest","сайд квэст","побочное приключение"],["big W","биг дабл-ю","большая победа"],["rent free","рент фри","засело в голове"],["slay","слэй","блистать, круто справиться"],["low-key","лоу-ки","немного, тайком"],["main character","мэйн кэрэктэр","главный герой"]]},"sent":{"title":"Предложения","words":[["I am a student.","ай эм э стьюдэнт","Я студент."],["You are my friend.","ю ар май фрэнд","Ты мой друг."],["He is a doctor.","хи из э доктэр","Он врач."],["She is very happy.","ши из вэри хэпи","Она очень счастлива."],["We are at home.","ви ар эт хоум","Мы дома."],["They are my family.","дэй ар май фэмили","Они моя семья."],["I like coffee.","ай лайк кофи","Я люблю кофе."],["She likes tea.","ши лайкс ти","Она любит чай."],["I want some water.","ай вонт сам вотэр","Я хочу воды."],["He drinks milk.","хи дринкс милк","Он пьёт молоко."],["They have a cat.","дэй хэв э кэт","У них есть кот."],["I live in a big city.","ай лив ин э биг сити","Я живу в большом городе."],["Do you like pizza?","ду ю лайк пица","Ты любишь пиццу?"],["Where is my phone?","уэр из май фоун","Где мой телефон?"],["I do not know.","ай ду нот ноу","Я не знаю."],["What is your name?","уот из ё нэйм","Как тебя зовут?"],["Can you help me?","кэн ю хэлп ми","Ты можешь мне помочь?"],["I do not like tea.","ай ду нот лайк ти","Я не люблю чай."],["Bro is cooked.","броу из кукт","Брату конец."],["This pizza is mid.","дис пица из мид","Эта пицца так себе."],["You need to touch grass.","ю нид ту тач грэс","Тебе надо выйти из интернета."],["I need to lock in.","ай нид ту лок ин","Мне нужно собраться."],["He has so much rizz.","хи хэз соу мач риз","У него столько харизмы."],["My brain is rotting.","май брейн из ротинг","Мой мозг гниёт."],["I was at home.","ай уоз эт хоум","Я был дома."],["She went to school.","ши вент ту скул","Она пошла в школу."],["We ate pizza yesterday.","ви эйт пица йестэдэй","Мы вчера ели пиццу."],["He watched a movie.","хи уочт э муви","Он смотрел фильм."],["I did not sleep well.","ай дид нот слип уэл","Я плохо спал."],["They played games all night.","дэй плейд геймс ол найт","Они играли в игры всю ночь."],["I want to learn English.","ай вонт ту лёрн инглиш","Я хочу выучить английский."],["I will call you tomorrow.","ай уил кол ю туморроу","Я позвоню тебе завтра."],["We are going to travel.","ви ар гоуин ту трэвл","Мы собираемся путешествовать."],["She can speak English.","ши кэн спик инглиш","Она умеет говорить по-английски."],["I must go now.","ай маст гоу нау","Мне пора идти."],["Let us start the game.","лет ас старт зэ гейм","Давай начнём игру."],["Chat is going crazy.","чэт из гоуин крэйзи","Чат сходит с ума."],["That clip went viral.","дэт клип вент вайрэл","Этот клип стал вирусным."],["Drop the link in chat.","дроп зэ линк ин чэт","Кинь ссылку в чат."],["The stream just started.","зэ стрим джаст стартид","Стрим только что начался."],["I watch streams every night.","ай уоч стримс эври найт","Я смотрю стримы каждую ночь."],["Please like and subscribe.","плиз лайк энд сабскрайб","Пожалуйста, лайкни и подпишись."],["I am reading a book.","ай эм ридинг э бук","Я читаю книгу."],["She is playing a game.","ши из плэинг э гейм","Она играет в игру."],["We are watching a movie.","ви ар уотчинг э муви","Мы смотрим фильм."],["He is running in the park.","хи из раннинг ин зэ парк","Он бежит в парке."],["What are you doing?","уот ар ю дуинг","Что ты делаешь?"],["They are eating lunch.","дэй ар итинг ланч","Они обедают."],["That was a huge win.","дэт уоз э хьюдж уин","Это была огромная победа."],["Her glow up is crazy.","хё глоу ап из крэйзи","Её преображение — огонь."],["He lives in my head rent free.","хи лайвз ин май хэд рент фри","Он живёт у меня в голове бесплатно."],["Stop doomscrolling and sleep.","стоп думскроллинг энд слип","Хватит листать ленту, спи."],["I am vibe coding a game.","ай эм вайб кодинг э гейм","Я делаю игру вайб-кодингом."],["This is just ragebait.","дис из джаст рэйджбэйт","Это просто рейджбейт."],["She slayed that speech.","ши слэйд дэт спич","Она блестяще выступила."],["Let us do a side quest.","лет ас ду э сайд квэст","Давай пройдём побочный квест."],["He is aura farming.","хи из ора фармин","Он «качает ауру»."],["This game is low-key hard.","дис гейм из лоу-ки хард","Эта игра тайно сложная."],["I am the main character today.","ай эм зэ мэйн кэрэктэр тудэй","Сегодня я главный герой."],["Chat, drop a link here.","чэт дроп э линк хиэр","Чат, кинь ссылку сюда."]]},"animals":{"title":"Животные","words":[["dog","дог","собака"],["cat","кэт","кот"],["bird","бёрд","птица"],["fish","фиш","рыба"],["horse","хорс","лошадь"],["cow","кау","корова"],["rabbit","рэбит","кролик"],["bear","бэар","медведь"],["wolf","вулф","волк"],["tiger","тайгэр","тигр"]]},"colors":{"title":"Цвета","words":[["red","рэд","красный"],["blue","блу","синий"],["green","грин","зелёный"],["yellow","йэллоу","жёлтый"],["black","блэк","чёрный"],["white","уайт","белый"],["pink","пинк","розовый"],["purple","пёрпл","фиолетовый"]]},"school":{"title":"Школа","words":[["book","бук","книга"],["pen","пэн","ручка"],["teacher","тичэр","учитель"],["student","стьюдэнт","ученик"],["school","скул","школа"],["homework","хоумвёрк","домашка"],["test","тэст","тест"],["lesson","лэссн","урок"],["phone","фоун","телефон"],["game","гейм","игра"]]},"verbs":{"title":"Глаголы","words":[["go","гоу","идти"],["eat","ит","есть"],["drink","дринк","пить"],["play","плэй","играть"],["read","рид","читать"],["write","райт","писать"],["sleep","слип","спать"],["run","ран","бегать"],["watch","уотч","смотреть"],["like","лайк","любить"],["want","вонт","хотеть"],["see","си","видеть"]]},"time":{"title":"Время","words":[["today","тудэй","сегодня"],["tomorrow","туморроу","завтра"],["yesterday","йестэдэй","вчера"],["morning","морнинг","утро"],["evening","ивнинг","вечер"],["night","найт","ночь"],["week","уик","неделя"],["day","дэй","день"]]},"home":{"title":"Дом","words":[["house","хаус","дом"],["room","рум","комната"],["door","дор","дверь"],["window","виндоу","окно"],["bed","бэд","кровать"],["table","тэйбл","стол"],["chair","чэар","стул"],["kitchen","китчин","кухня"]]}},"examples":{"Hello":["Hello, how are you?","Привет, как дела?"],"Goodbye":["Goodbye, see you tomorrow!","До свидания, до завтра!"],"Please":["Tea, please.","Чай, пожалуйста."],"Thank you":["Thank you for the tea.","Спасибо за чай."],"Sorry":["Sorry, I am late.","Извините, я опоздал."],"Yes":["Yes, I know.","Да, я знаю."],"No":["No, thank you.","Нет, спасибо."],"Good morning":["Good morning, Anna!","Доброе утро, Анна!"],"My name is":["My name is Ivan.","Меня зовут Иван."],"How are you?":["Hi! How are you?","Привет! Как дела?"],"Fine":["I am fine, thank you.","У меня всё хорошо, спасибо."],"I":["I am a student.","Я студент."],"You":["You are my friend.","Ты мой друг."],"Friend":["This is my friend.","Это мой друг."],"Mother":["This is my mother.","Это моя мама."],"Father":["My father is at home.","Мой папа дома."],"one":["One ticket, please.","Один билет, пожалуйста."],"two":["Two teas, please.","Два чая, пожалуйста."],"three":["Three apples.","Три яблока."],"four":["Four days.","Четыре дня."],"five":["Five minutes.","Пять минут."],"six":["Six hours.","Шесть часов."],"seven":["Seven days.","Семь дней."],"eight":["Eight apples.","Восемь яблок."],"nine":["Nine tickets.","Девять билетов."],"ten":["Ten minutes.","Десять минут."],"bread":["Bread and soup.","Хлеб и суп."],"water":["Water, please.","Воду, пожалуйста."],"milk":["I drink milk.","Я пью молоко."],"tea":["The tea is hot.","Чай горячий."],"coffee":["Coffee, please.","Кофе, пожалуйста."],"apple":["This is an apple.","Это яблоко."],"meat":["I like meat.","Я люблю мясо."],"soup":["The soup is hot.","Суп горячий."],"Where?":["Where is the station?","Где вокзал?"],"station":["The station is here.","Вокзал здесь."],"airport":["Where is the airport?","Где аэропорт?"],"ticket":["I need a ticket.","Мне нужен билет."],"hotel":["My hotel is here.","Мой отель здесь."],"street":["This is a long street.","Это длинная улица."],"How much?":["How much is the ticket?","Сколько стоит билет?"],"Help!":["Help me, please!","Помогите мне, пожалуйста!"],"6-7":["He just yelled six seven.","Он просто крикнул «сикс-сэвен»."],"skibidi":["Why is everyone saying skibidi?","Почему все говорят «скибиди»?"],"rizz":["He has so much rizz.","У него столько харизмы."],"aura":["That move gave him +1000 aura.","Этот поступок дал ему +1000 ауры."],"lock in":["Time to lock in and study.","Пора собраться и учиться."],"crash out":["Don't crash out over a test.","Не психуй из-за теста."],"slop":["My feed is full of AI slop.","Моя лента забита ИИ-шлаком."],"cooked":["I forgot my homework, I'm cooked.","Я забыл домашку, мне конец."],"mid":["This movie is mid.","Этот фильм так себе."],"yapping":["Stop yapping and listen.","Хватит болтать и слушай."],"goated":["This song is goated.","Эта песня легендарная."],"delulu":["I'm delulu but happy.","Я в иллюзиях, но счастлив."],"no cap":["That was the best pizza, no cap.","Это была лучшая пицца, честно."],"brainrot":["Too many memes, I have brainrot.","Слишком много мемов, у меня брейнрот."],"touch grass":["You need to touch grass.","Тебе надо выйти из интернета."],"it's giving":["It's giving main character.","Это вайб главного героя."],"NPC":["He acts like an NPC today.","Сегодня он ведёт себя как бот."],"Chat, is this real?":["Chat, is this real?","Чат, это вообще реально?"],"aura farming":["He is aura farming at the party.","Он «качает ауру» на вечеринке."],"vibe coding":["I am vibe coding a small game.","Я делаю игру вайб-кодингом."],"ragebait":["This video is just ragebait.","Это видео просто рейджбейт."],"doomscrolling":["Stop doomscrolling and go to sleep.","Хватит листать ленту, иди спать."],"glow up":["Her glow up is crazy.","Её преображение — огонь."],"side quest":["Buying bread became a side quest.","Покупка хлеба стала побочным квестом."],"big W":["Finding my keys was a big W.","Найти ключи — большая победа."],"rent free":["That song lives in my head rent free.","Эта песня засела у меня в голове."],"slay":["You slay in this video!","Ты блистаешь в этом видео!"],"low-key":["I low-key love this song.","Мне эта песня тайно очень нравится."],"main character":["Today I am the main character.","Сегодня я главный герой."]},"lessons":[{"id":"a1","sec":"Алфавит","e":"A","t":"Буквы A–E","d":"A B C D E","type":"l","items":[0,1,2,3,4],"tip":"В английском 26 букв: 5 гласных (A, E, I, O, U) и 21 согласная. Название буквы (эй, би, си) — это не всегда то, как она звучит в слове."},{"id":"a2","sec":"Алфавит","e":"F","t":"Буквы F–J","d":"F G H I J","type":"l","items":[5,6,7,8,9],"tip":"Не путайте G («джи») и J («джей»). Буква H называется «эйч», а в слове house звучит как лёгкий выдох."},{"id":"a3","sec":"Алфавит","e":"K","t":"Буквы K–O","d":"K L M N O","type":"l","items":[10,11,12,13,14],"tip":"M («эм») и N («эн») звучат похоже, слушайте внимательно. Буква O называется «оу»."},{"id":"a4","sec":"Алфавит","e":"P","t":"Буквы P–T","d":"P Q R S T","type":"l","items":[15,16,17,18,19],"tip":"Q почти всегда идёт вместе с U: queen. Английская R не раскатистая, язык не касается нёба."},{"id":"a5","sec":"Алфавит","e":"Z","t":"Буквы U–Z","d":"U V W X Y Z","type":"l","items":[20,21,22,23,24,25],"tip":"W называется «дабл-ю», то есть «двойное U». В американском английском Z читается «зи», в британском — «зед»."},{"id":"w1","sec":"Слова","e":"👋","t":"Привет!","d":"Приветствия и вежливость","type":"w","items":["Hello","Goodbye","Please","Thank you","Sorry","Yes","No","Good morning"],"tip":"Hello подходит всегда. Hi — короче и неформально. Please и Thank you в английском говорят очень часто."},{"id":"w2","sec":"Слова","e":"🙂","t":"О себе","d":"Имя, дела, семья","type":"w","items":["My name is","How are you?","Fine","I","You","Friend","Mother","Father"],"tip":"В английском нельзя пропускать глагол: I am a student — «Я есть студент». Нельзя сказать «I student»."},{"id":"m1","sec":"Мемы 🔥","e":"😎","t":"Сленг: харизма","d":"rizz, aura, goated…","type":"w","items":["rizz","aura","it's giving","goated","no cap","delulu"],"tip":"Это сленг Gen Z из TikTok: rizz — харизма, aura — ваша «аура» (за позор её теряют), it's giving — «это вайб». В чатах так говорят, а на экзамене лучше обычный английский."},{"id":"w3","sec":"Слова","e":"1️⃣","t":"Числа 1–5","d":"one … five","type":"w","items":["one","two","three","four","five"],"tip":"В слове three звук th — это кончик языка между зубами. Это не «з» и не «с»."},{"id":"w4","sec":"Слова","e":"🔟","t":"Числа 6–10","d":"six … ten","type":"w","items":["six","seven","eight","nine","ten"],"tip":"Eight читается «эйт», а gh не произносится. Многие английские слова пишутся не так, как звучат."},{"id":"m2","sec":"Мемы 🔥","e":"💀","t":"Сленг: «мне конец»","d":"cooked, lock in, touch grass…","type":"w","items":["cooked","crash out","lock in","mid","slop","touch grass"],"tip":"Забыл домашку? I'm cooked. Пора браться за ум? Lock in. Слишком долго сидишь в телефоне? Тебе скажут: touch grass."},{"id":"w5","sec":"Слова","e":"🍞","t":"Еда и напитки","d":"В кафе","type":"w","items":["bread","water","milk","tea","coffee","apple","meat","soup"],"tip":"В английском важно ударение: COF-fee, AP-ple. Ударный слог произносится громче и чуть длиннее."},{"id":"w6","sec":"Слова","e":"🧳","t":"Путешествие","d":"В дороге","type":"w","items":["Where?","station","airport","ticket","hotel","street","How much?","Help!"],"tip":"Полезная конструкция: Where is …? значит «Где …?». Попробуйте: Where is the station?"},{"id":"w7","sec":"Слова","e":"🐶","t":"Животные","d":"dog, cat, bird…","type":"w","items":["dog","cat","bird","fish","horse","cow","rabbit","bear","wolf","tiger"],"tip":"Животные в английском: a dog, a cat. Перед словом в единственном числе обычно стоит a: a dog, a bird."},{"id":"w8","sec":"Слова","e":"🎨","t":"Цвета","d":"red, blue, green…","type":"w","items":["red","blue","green","yellow","black","white","pink","purple"],"tip":"Цвет ставится перед предметом: a red apple, a blue pen. В русском наоборот, поэтому тренируйтесь."},{"id":"w9","sec":"Слова","e":"🏫","t":"Школа","d":"book, teacher, homework…","type":"w","items":["book","pen","teacher","student","school","homework","test","lesson","phone","game"],"tip":"Слова для школы пригодятся каждый день. Homework — это не множественное число: говорим my homework."},{"id":"w10","sec":"Слова","e":"🏃","t":"Глаголы","d":"go, eat, play…","type":"w","items":["go","eat","drink","play","read","write","sleep","run","watch","like"],"tip":"Глагол — главное слово действия: I eat, I play, I sleep. С he/she/it добавляем -s: she plays."},{"id":"w11","sec":"Слова","e":"⏰","t":"Время","d":"today, tomorrow, night…","type":"w","items":["today","tomorrow","yesterday","morning","evening","night","week","day"],"tip":"Слова времени ставят в начало или конец: Today I play. I play today."},{"id":"w12","sec":"Слова","e":"🏠","t":"Дом","d":"house, room, bed…","type":"w","items":["house","room","door","window","bed","table","chair","kitchen"],"tip":"My house, my room, my bed. Притяжательное my значит «мой, моя, моё»."},{"id":"s1","sec":"Предложения","e":"🧱","t":"Я есть…","d":"I am, you are, he is","type":"w","sent":1,"items":["I am a student.","You are my friend.","He is a doctor.","She is very happy.","We are at home.","They are my family."],"tip":"Простое предложение: кто + am/is/are + кто или какой. I → am, he/she/it → is, you/we/they → are. В английском глагол нельзя пропускать."},{"id":"s2","sec":"Предложения","e":"🔧","t":"Что я делаю","d":"Порядок слов","type":"w","sent":1,"items":["I like coffee.","She likes tea.","I want some water.","He drinks milk.","They have a cat.","I live in a big city."],"tip":"Порядок слов почти всегда такой: кто → что делает → что или где. К he/she/it в настоящем времени добавляется -s: she likes."},{"id":"s3","sec":"Предложения","e":"❓","t":"Вопросы и «не»","d":"Do you…? I do not…","type":"w","sent":1,"items":["Do you like pizza?","Where is my phone?","I do not know.","What is your name?","Can you help me?","I do not like tea."],"tip":"В вопросе вперёд выходит помощник: Do you like…? Can you…? Для «не» ставим not после помощника: I do not know."},{"id":"s5","sec":"Предложения","e":"⏪","t":"Прошлое","d":"was, went, did not","type":"w","sent":1,"items":["I was at home.","She went to school.","We ate pizza yesterday.","He watched a movie.","I did not sleep well.","They played games all night."],"tip":"Прошлое: I was / we were. У многих глаголов добавляется -ed (watched), а некоторые особые: go → went, eat → ate. Для «не» ставим did not + глагол в обычной форме."},{"id":"s6","sec":"Предложения","e":"🚀","t":"Планы и желания","d":"will, want to, can","type":"w","sent":1,"items":["I want to learn English.","I will call you tomorrow.","We are going to travel.","She can speak English.","I must go now.","Let us start the game."],"tip":"Будущее: will + глагол. Желание и план: want to / going to + глагол. После can, must и will глагол идёт без to: I can go."},{"id":"s8","sec":"Предложения","e":"🎬","t":"Что происходит сейчас","d":"am/is/are + -ing","type":"w","items":["I am reading a book.","She is playing a game.","We are watching a movie.","He is running in the park.","What are you doing?","They are eating lunch."],"tip":"Действие прямо сейчас: am/is/are + глагол с -ing. I am reading, she is playing.","sent":1},{"id":"m3","sec":"Мемы 🔥","e":"🧠","t":"Сленг: интернет","d":"skibidi, 6-7, brainrot…","type":"w","items":["skibidi","6-7","brainrot","yapping","NPC","Chat, is this real?"],"tip":"Skibidi и 6-7 не имеют точного смысла: смешно именно поэтому. Brainrot — шуточное название эпохи бесконечных мемов, а «Chat, is this real?» любят стримеры."},{"id":"s4","sec":"Мемы 🔥","e":"🤡","t":"Собери мем","d":"Предложения в мемном стиле","type":"w","sent":1,"items":["Bro is cooked.","This pizza is mid.","You need to touch grass.","I need to lock in.","He has so much rizz.","My brain is rotting."],"tip":"Тот же порядок слов, только фразы из интернета. Если справишься, уже можешь комментировать мемы по-английски."},{"id":"s7","sec":"Мемы 🔥","e":"🎬","t":"Стрим-сленг","d":"Чат, клипы, стримы","type":"w","sent":1,"items":["Chat is going crazy.","That clip went viral.","Drop the link in chat.","The stream just started.","I watch streams every night.","Please like and subscribe."],"tip":"Фразы, которые пригодятся в мире стримов и клипов. Порядок слов тот же: кто → что делает → что или где."},{"id":"m4","sec":"Мемы 🔥","e":"🌾","t":"Сленг 2026","d":"aura farming, ragebait, slay…","type":"w","items":["aura farming","vibe coding","ragebait","doomscrolling","low-key","slay"],"tip":"Слова из лент 2025–2026: aura farming — «качать ауру», vibe coding — программировать вместе с ИИ, ragebait — наживка для гнева, doomscrolling — бесконечная лента."},{"id":"m5","sec":"Мемы 🔥","e":"🏆","t":"Победа и вайб","d":"big W, glow up, side quest…","type":"w","items":["big W","glow up","side quest","rent free","main character"],"tip":"W — от win (победа), L — от loss (поражение). Big W значит «вот это победа!». Главный герой — main character."},{"id":"s9","sec":"Мемы 🔥","e":"🤳","t":"Собери мем 2","d":"Фразы из мемов","type":"w","items":["That was a huge win.","Her glow up is crazy.","He lives in my head rent free.","Stop doomscrolling and sleep.","I am vibe coding a game.","This is just ragebait."],"tip":"Мемные фразы строятся как обычные: кто → что делает → что. Собери их по порядку слов.","sent":1},{"id":"s10","sec":"Мемы 🔥","e":"🎤","t":"Собери мем 3","d":"Ещё мемные фразы","type":"w","items":["She slayed that speech.","Let us do a side quest.","He is aura farming.","This game is low-key hard.","I am the main character today.","Chat, drop a link here."],"tip":"Последний мемный набор: теперь ты можешь комментировать мемы по-английски.","sent":1}]}</script>
+<script id="data" type="application/json">{"alpha":[["A a","эй","Ay","apple","яблоко"],["B b","би","Bee","book","книга"],["C c","си","See","cat","кот"],["D d","ди","Dee","dog","собака"],["E e","и","Ee","egg","яйцо"],["F f","эф","Eff","fish","рыба"],["G g","джи","Gee","green","зелёный"],["H h","эйч","Aitch","house","дом"],["I i","ай","Eye","ice","лёд"],["J j","джей","Jay","juice","сок"],["K k","кей","Kay","key","ключ"],["L l","эл","El","lemon","лимон"],["M m","эм","Em","milk","молоко"],["N n","эн","En","nose","нос"],["O o","оу","Oh","orange","апельсин"],["P p","пи","Pee","pen","ручка"],["Q q","кью","Cue","queen","королева"],["R r","ар","Are","red","красный"],["S s","эс","Ess","sun","солнце"],["T t","ти","Tee","tea","чай"],["U u","ю","You","umbrella","зонт"],["V v","ви","Vee","van","фургон"],["W w","дабл-ю","Double you","water","вода"],["X x","икс","Ex","box","коробка"],["Y y","уай","Why","yes","да"],["Z z","зи","Zee","zebra","зебра"]],"topics":{"greet":{"title":"Приветствия","words":[["Hello","хэллоу","Привет"],["Goodbye","гудбай","До свидания"],["Please","плиз","Пожалуйста"],["Thank you","сэнк ю","Спасибо"],["Sorry","сорри","Извините"],["Yes","йес","Да"],["No","ноу","Нет"],["Good morning","гуд морнинг","Доброе утро"]]},"intro":{"title":"О себе","words":[["My name is","май нэйм из","Меня зовут"],["How are you?","хау ар ю","Как дела?"],["Fine","файн","Хорошо"],["I","ай","Я"],["You","ю","Ты / Вы"],["Friend","фрэнд","Друг"],["Mother","мазэр","Мама"],["Father","фазэр","Папа"]]},"numbers":{"title":"Числа","words":[["one","уан","один"],["two","ту","два"],["three","сри","три"],["four","фор","четыре"],["five","файв","пять"],["six","сикс","шесть"],["seven","сэвэн","семь"],["eight","эйт","восемь"],["nine","найн","девять"],["ten","тэн","десять"]]},"food":{"title":"Еда","words":[["bread","брэд","хлеб"],["water","вотэр","вода"],["milk","милк","молоко"],["tea","ти","чай"],["coffee","кофи","кофе"],["apple","эпл","яблоко"],["meat","мит","мясо"],["soup","суп","суп"]]},"travel":{"title":"Путешествие","words":[["Where?","уэр","Где?"],["station","стэйшн","вокзал"],["airport","эйрпорт","аэропорт"],["ticket","тикит","билет"],["hotel","хоутэл","отель"],["street","стрит","улица"],["How much?","хау мач","Сколько стоит?"],["Help!","хэлп","Помогите!"]]},"memes":{"title":"Мемы 🔥","words":[["6-7","сикс-сэвен","мемное число без смысла"],["skibidi","скибиди","мемное слово без смысла"],["rizz","риз","харизма, умение нравиться"],["aura","ора","личная харизма"],["lock in","лок ин","собраться и сосредоточиться"],["crash out","краш аут","сорваться, психануть"],["slop","слоп","ИИ-шлак"],["cooked","кукт","мне конец"],["mid","мид","так себе"],["yapping","япинг","болтать без умолку"],["goated","гоутид","легендарный, лучший"],["delulu","делулу","живёт в мечтах"],["no cap","ноу кэп","без обмана, честно"],["brainrot","брейнрот","мозг сгнил от мемов"],["touch grass","тач грэс","выйди из интернета"],["it's giving","итс гивинг","выглядит как; вайб"],["NPC","эн-пи-си","человек как бот"],["Chat, is this real?","чат из зис риал","Чат, это реально?"],["aura farming","ора фармин","красиво «качать ауру»"],["vibe coding","вайб кодинг","делать программы, просто объясняя ИИ"],["ragebait","рэйджбэйт","контент, чтобы тебя разозлить"],["doomscrolling","думскроллинг","бесконечно листать ленту"],["glow up","глоу ап","крутое преображение"],["side quest","сайд квэст","побочное приключение"],["big W","биг дабл-ю","большая победа"],["rent free","рент фри","засело в голове"],["slay","слэй","блистать, круто справиться"],["low-key","лоу-ки","немного, тайком"],["main character","мэйн кэрэктэр","главный герой"]]},"sent":{"title":"Предложения","words":[["I am a student.","ай эм э стьюдэнт","Я студент."],["You are my friend.","ю ар май фрэнд","Ты мой друг."],["He is a doctor.","хи из э доктэр","Он врач."],["She is very happy.","ши из вэри хэпи","Она очень счастлива."],["We are at home.","ви ар эт хоум","Мы дома."],["They are my family.","дэй ар май фэмили","Они моя семья."],["I like coffee.","ай лайк кофи","Я люблю кофе."],["She likes tea.","ши лайкс ти","Она любит чай."],["I want some water.","ай вонт сам вотэр","Я хочу воды."],["He drinks milk.","хи дринкс милк","Он пьёт молоко."],["They have a cat.","дэй хэв э кэт","У них есть кот."],["I live in a big city.","ай лив ин э биг сити","Я живу в большом городе."],["Do you like pizza?","ду ю лайк пица","Ты любишь пиццу?"],["Where is my phone?","уэр из май фоун","Где мой телефон?"],["I do not know.","ай ду нот ноу","Я не знаю."],["What is your name?","уот из ё нэйм","Как тебя зовут?"],["Can you help me?","кэн ю хэлп ми","Ты можешь мне помочь?"],["I do not like tea.","ай ду нот лайк ти","Я не люблю чай."],["Bro is cooked.","броу из кукт","Брату конец."],["This pizza is mid.","дис пица из мид","Эта пицца так себе."],["You need to touch grass.","ю нид ту тач грэс","Тебе надо выйти из интернета."],["I need to lock in.","ай нид ту лок ин","Мне нужно собраться."],["He has so much rizz.","хи хэз соу мач риз","У него столько харизмы."],["My brain is rotting.","май брейн из ротинг","Мой мозг гниёт."],["I was at home.","ай уоз эт хоум","Я был дома."],["She went to school.","ши вент ту скул","Она пошла в школу."],["We ate pizza yesterday.","ви эйт пица йестэдэй","Мы вчера ели пиццу."],["He watched a movie.","хи уочт э муви","Он смотрел фильм."],["I did not sleep well.","ай дид нот слип уэл","Я плохо спал."],["They played games all night.","дэй плейд геймс ол найт","Они играли в игры всю ночь."],["I want to learn English.","ай вонт ту лёрн инглиш","Я хочу выучить английский."],["I will call you tomorrow.","ай уил кол ю туморроу","Я позвоню тебе завтра."],["We are going to travel.","ви ар гоуин ту трэвл","Мы собираемся путешествовать."],["She can speak English.","ши кэн спик инглиш","Она умеет говорить по-английски."],["I must go now.","ай маст гоу нау","Мне пора идти."],["Let us start the game.","лет ас старт зэ гейм","Давай начнём игру."],["Chat is going crazy.","чэт из гоуин крэйзи","Чат сходит с ума."],["That clip went viral.","дэт клип вент вайрэл","Этот клип стал вирусным."],["Drop the link in chat.","дроп зэ линк ин чэт","Кинь ссылку в чат."],["The stream just started.","зэ стрим джаст стартид","Стрим только что начался."],["I watch streams every night.","ай уоч стримс эври найт","Я смотрю стримы каждую ночь."],["Please like and subscribe.","плиз лайк энд сабскрайб","Пожалуйста, лайкни и подпишись."],["I am reading a book.","ай эм ридинг э бук","Я читаю книгу."],["She is playing a game.","ши из плэинг э гейм","Она играет в игру."],["We are watching a movie.","ви ар уотчинг э муви","Мы смотрим фильм."],["He is running in the park.","хи из раннинг ин зэ парк","Он бежит в парке."],["What are you doing?","уот ар ю дуинг","Что ты делаешь?"],["They are eating lunch.","дэй ар итинг ланч","Они обедают."],["That was a huge win.","дэт уоз э хьюдж уин","Это была огромная победа."],["Her glow up is crazy.","хё глоу ап из крэйзи","Её преображение — огонь."],["He lives in my head rent free.","хи лайвз ин май хэд рент фри","Он живёт у меня в голове бесплатно."],["Stop doomscrolling and sleep.","стоп думскроллинг энд слип","Хватит листать ленту, спи."],["I am vibe coding a game.","ай эм вайб кодинг э гейм","Я делаю игру вайб-кодингом."],["This is just ragebait.","дис из джаст рэйджбэйт","Это просто рейджбейт."],["She slayed that speech.","ши слэйд дэт спич","Она блестяще выступила."],["Let us do a side quest.","лет ас ду э сайд квэст","Давай пройдём побочный квест."],["He is aura farming.","хи из ора фармин","Он «качает ауру»."],["This game is low-key hard.","дис гейм из лоу-ки хард","Эта игра тайно сложная."],["I am the main character today.","ай эм зэ мэйн кэрэктэр тудэй","Сегодня я главный герой."],["Chat, drop a link here.","чэт дроп э линк хиэр","Чат, кинь ссылку сюда."],["I wake up at seven.","ай уэйк ап эт сэвэн","Я просыпаюсь в семь."],["I brush my teeth.","ай браш май тиз","Я чищу зубы."],["I eat breakfast at home.","ай ит брэкфэст эт хоум","Я завтракаю дома."],["She goes to work by bus.","ши гоуз ту вёрк бай бас","Она едет на работу на автобусе."],["We have lunch at noon.","ви хэв ланч эт нун","Мы обедаем в полдень."],["He goes to bed at ten.","хи гоуз ту бэд эт тэн","Он ложится спать в десять."],["My mother is kind.","май мазэр из кайнд","Моя мама добрая."],["My father works a lot.","май фазэр вёркс э лот","Мой папа много работает."],["I have a big family.","ай хэв э биг фэмили","У меня большая семья."],["She has two brothers.","ши хэз ту бразэрз","У неё два брата."],["He has a little sister.","хи хэз э литл систэр","У него есть младшая сестра."],["We love our grandmother.","ви лав ауэр грэндмазэр","Мы любим нашу бабушку."],["I would like some tea.","ай вуд лайк сам ти","Я бы хотел чаю."],["Can I have the menu?","кэн ай хэв зэ мэню","Можно мне меню?"],["The soup is very hot.","зэ суп из вэри хот","Суп очень горячий."],["How much is the coffee?","хау мач из зэ кофи","Сколько стоит кофе?"],["The bill, please.","зэ бил плиз","Счёт, пожалуйста."],["I do not eat meat.","ай ду нот ит мит","Я не ем мясо."],["Where is the bank?","уэр из зэ бэнк","Где банк?"],["Turn left here.","тёрн лефт хиэр","Поверните здесь налево."],["Go straight ahead.","гоу стрэйт эхэд","Идите прямо."],["The park is near.","зэ парк из ниэр","Парк рядом."],["I live far from school.","ай лив фар фром скул","Я живу далеко от школы."],["The shop is open.","зэ шоп из оупн","Магазин открыт."],["It is cold today.","ит из коулд тудэй","Сегодня холодно."],["It is raining now.","ит из рэйнинг нау","Сейчас идёт дождь."],["The sun is bright.","зэ сан из брайт","Солнце яркое."],["I am very tired.","ай эм вэри тайэд","Я очень устал."],["She is not sad.","ши из нот сэд","Она не грустит."],["We are hungry.","ви ар хангри","Мы голодны."],["I love music.","ай лав мьюзик","Я люблю музыку."],["He plays football every day.","хи плэйз футбол эври дэй","Он играет в футбол каждый день."],["She draws very well.","ши дроз вэри уэл","Она очень хорошо рисует."],["We like to swim.","ви лайк ту свим","Мы любим плавать."],["They watch cartoons.","дэй уоч картунз","Они смотрят мультики."],["I read books at night.","ай рид букс эт найт","Я читаю книги по ночам."],["What time is it?","уот тайм из ит","Который час?"],["Who is your friend?","ху из ё фрэнд","Кто твой друг?"],["Why are you sad?","уай ар ю сэд","Почему ты грустишь?"],["When is the lesson?","уэн из зэ лэссн","Когда урок?"],["Where do you live?","уэр ду ю лив","Где ты живёшь?"],["How old are you?","хау оулд ар ю","Сколько тебе лет?"],["That was so mid.","дэт уоз соу мид","Это было так себе."],["No cap, this song is goated.","ноу кэп дис сонг из гоутид","Без обмана, эта песня легенда."],["My aura is gone.","май ора из гон","Моя аура пропала."],["She is so delulu.","ши из соу делулу","Она вся в мечтах."],["Stop yapping, bro.","стоп япинг броу","Хватит болтать, бро."],["I am so cooked.","ай эм соу кукт","Мне совсем конец."]]},"animals":{"title":"Животные","words":[["dog","дог","собака"],["cat","кэт","кот"],["bird","бёрд","птица"],["fish","фиш","рыба"],["horse","хорс","лошадь"],["cow","кау","корова"],["rabbit","рэбит","кролик"],["bear","бэар","медведь"],["wolf","вулф","волк"],["tiger","тайгэр","тигр"]]},"colors":{"title":"Цвета","words":[["red","рэд","красный"],["blue","блу","синий"],["green","грин","зелёный"],["yellow","йэллоу","жёлтый"],["black","блэк","чёрный"],["white","уайт","белый"],["pink","пинк","розовый"],["purple","пёрпл","фиолетовый"]]},"school":{"title":"Школа","words":[["book","бук","книга"],["pen","пэн","ручка"],["teacher","тичэр","учитель"],["student","стьюдэнт","ученик"],["school","скул","школа"],["homework","хоумвёрк","домашка"],["test","тэст","тест"],["lesson","лэссн","урок"],["phone","фоун","телефон"],["game","гейм","игра"]]},"verbs":{"title":"Глаголы","words":[["go","гоу","идти"],["eat","ит","есть"],["drink","дринк","пить"],["play","плэй","играть"],["read","рид","читать"],["write","райт","писать"],["sleep","слип","спать"],["run","ран","бегать"],["watch","уотч","смотреть"],["like","лайк","любить"],["want","вонт","хотеть"],["see","си","видеть"]]},"time":{"title":"Время","words":[["today","тудэй","сегодня"],["tomorrow","туморроу","завтра"],["yesterday","йестэдэй","вчера"],["morning","морнинг","утро"],["evening","ивнинг","вечер"],["night","найт","ночь"],["week","уик","неделя"],["day","дэй","день"]]},"home":{"title":"Дом","words":[["house","хаус","дом"],["room","рум","комната"],["door","дор","дверь"],["window","виндоу","окно"],["bed","бэд","кровать"],["table","тэйбл","стол"],["chair","чэар","стул"],["kitchen","китчин","кухня"]]},"body":{"title":"Тело","words":[["head","хэд","голова"],["hand","хэнд","рука"],["leg","лэг","нога"],["eye","ай","глаз"],["ear","иэ","ухо"],["mouth","маус","рот"],["nose","ноуз","нос"],["face","фэйс","лицо"]]},"clothes":{"title":"Одежда","words":[["shirt","шёрт","рубашка"],["pants","пэнтс","брюки"],["shoes","шуз","обувь"],["hat","хэт","шапка"],["coat","коут","пальто"],["dress","дрэс","платье"],["socks","сокс","носки"],["jacket","джэкит","куртка"]]},"adj":{"title":"Какой?","words":[["big","биг","большой"],["small","смол","маленький"],["hot","хот","горячий"],["cold","коулд","холодный"],["new","нью","новый"],["old","оулд","старый"],["good","гуд","хороший"],["bad","бэд","плохой"]]},"places":{"title":"Места","words":[["park","парк","парк"],["shop","шоп","магазин"],["bank","бэнк","банк"],["cinema","синэма","кинотеатр"],["library","лайбрэри","библиотека"],["hospital","хоспитл","больница"],["city","сити","город"],["village","вилидж","деревня"]]},"weather":{"title":"Погода","words":[["sun","сан","солнце"],["rain","рэйн","дождь"],["snow","сноу","снег"],["wind","винд","ветер"],["cloud","клауд","облако"],["sky","скай","небо"],["warm","уорм","тёплый"],["storm","сторм","буря"]]}},"examples":{"Hello":["Hello, how are you?","Привет, как дела?"],"Goodbye":["Goodbye, see you tomorrow!","До свидания, до завтра!"],"Please":["Tea, please.","Чай, пожалуйста."],"Thank you":["Thank you for the tea.","Спасибо за чай."],"Sorry":["Sorry, I am late.","Извините, я опоздал."],"Yes":["Yes, I know.","Да, я знаю."],"No":["No, thank you.","Нет, спасибо."],"Good morning":["Good morning, Anna!","Доброе утро, Анна!"],"My name is":["My name is Ivan.","Меня зовут Иван."],"How are you?":["Hi! How are you?","Привет! Как дела?"],"Fine":["I am fine, thank you.","У меня всё хорошо, спасибо."],"I":["I am a student.","Я студент."],"You":["You are my friend.","Ты мой друг."],"Friend":["This is my friend.","Это мой друг."],"Mother":["This is my mother.","Это моя мама."],"Father":["My father is at home.","Мой папа дома."],"one":["One ticket, please.","Один билет, пожалуйста."],"two":["Two teas, please.","Два чая, пожалуйста."],"three":["Three apples.","Три яблока."],"four":["Four days.","Четыре дня."],"five":["Five minutes.","Пять минут."],"six":["Six hours.","Шесть часов."],"seven":["Seven days.","Семь дней."],"eight":["Eight apples.","Восемь яблок."],"nine":["Nine tickets.","Девять билетов."],"ten":["Ten minutes.","Десять минут."],"bread":["Bread and soup.","Хлеб и суп."],"water":["Water, please.","Воду, пожалуйста."],"milk":["I drink milk.","Я пью молоко."],"tea":["The tea is hot.","Чай горячий."],"coffee":["Coffee, please.","Кофе, пожалуйста."],"apple":["This is an apple.","Это яблоко."],"meat":["I like meat.","Я люблю мясо."],"soup":["The soup is hot.","Суп горячий."],"Where?":["Where is the station?","Где вокзал?"],"station":["The station is here.","Вокзал здесь."],"airport":["Where is the airport?","Где аэропорт?"],"ticket":["I need a ticket.","Мне нужен билет."],"hotel":["My hotel is here.","Мой отель здесь."],"street":["This is a long street.","Это длинная улица."],"How much?":["How much is the ticket?","Сколько стоит билет?"],"Help!":["Help me, please!","Помогите мне, пожалуйста!"],"6-7":["He just yelled six seven.","Он просто крикнул «сикс-сэвен»."],"skibidi":["Why is everyone saying skibidi?","Почему все говорят «скибиди»?"],"rizz":["He has so much rizz.","У него столько харизмы."],"aura":["That move gave him +1000 aura.","Этот поступок дал ему +1000 ауры."],"lock in":["Time to lock in and study.","Пора собраться и учиться."],"crash out":["Don't crash out over a test.","Не психуй из-за теста."],"slop":["My feed is full of AI slop.","Моя лента забита ИИ-шлаком."],"cooked":["I forgot my homework, I'm cooked.","Я забыл домашку, мне конец."],"mid":["This movie is mid.","Этот фильм так себе."],"yapping":["Stop yapping and listen.","Хватит болтать и слушай."],"goated":["This song is goated.","Эта песня легендарная."],"delulu":["I'm delulu but happy.","Я в иллюзиях, но счастлив."],"no cap":["That was the best pizza, no cap.","Это была лучшая пицца, честно."],"brainrot":["Too many memes, I have brainrot.","Слишком много мемов, у меня брейнрот."],"touch grass":["You need to touch grass.","Тебе надо выйти из интернета."],"it's giving":["It's giving main character.","Это вайб главного героя."],"NPC":["He acts like an NPC today.","Сегодня он ведёт себя как бот."],"Chat, is this real?":["Chat, is this real?","Чат, это вообще реально?"],"aura farming":["He is aura farming at the party.","Он «качает ауру» на вечеринке."],"vibe coding":["I am vibe coding a small game.","Я делаю игру вайб-кодингом."],"ragebait":["This video is just ragebait.","Это видео просто рейджбейт."],"doomscrolling":["Stop doomscrolling and go to sleep.","Хватит листать ленту, иди спать."],"glow up":["Her glow up is crazy.","Её преображение — огонь."],"side quest":["Buying bread became a side quest.","Покупка хлеба стала побочным квестом."],"big W":["Finding my keys was a big W.","Найти ключи — большая победа."],"rent free":["That song lives in my head rent free.","Эта песня засела у меня в голове."],"slay":["You slay in this video!","Ты блистаешь в этом видео!"],"low-key":["I low-key love this song.","Мне эта песня тайно очень нравится."],"main character":["Today I am the main character.","Сегодня я главный герой."],"head":["My head hurts.","У меня болит голова."],"hand":["Give me your hand.","Дай мне руку."],"leg":["He has a long leg.","У него длинная нога."],"eye":["She has blue eyes.","У неё голубые глаза."],"ear":["My ear is cold.","Моё ухо замёрзло."],"mouth":["Open your mouth.","Открой рот."],"nose":["I have a red nose.","У меня красный нос."],"face":["I wash my face.","Я умываю лицо."],"shirt":["This is my shirt.","Это моя рубашка."],"pants":["My pants are blue.","Мои брюки синие."],"shoes":["I need new shoes.","Мне нужна новая обувь."],"hat":["Put on a hat.","Надень шапку."],"coat":["I have a warm coat.","У меня тёплое пальто."],"dress":["She has a red dress.","У неё красное платье."],"socks":["Where are my socks?","Где мои носки?"],"jacket":["Take your jacket.","Возьми свою куртку."],"big":["This is a big house.","Это большой дом."],"small":["I have a small cat.","У меня маленький кот."],"hot":["The tea is hot.","Чай горячий."],"cold":["The water is cold.","Вода холодная."],"new":["This is a new phone.","Это новый телефон."],"old":["My book is old.","Моя книга старая."],"good":["This is a good game.","Это хорошая игра."],"bad":["That is a bad idea.","Это плохая идея."],"park":["I run in the park.","Я бегаю в парке."],"shop":["The shop is open.","Магазин открыт."],"bank":["Where is the bank?","Где банк?"],"cinema":["We go to the cinema.","Мы идём в кино."],"library":["I read in the library.","Я читаю в библиотеке."],"hospital":["The hospital is near.","Больница рядом."],"city":["I live in a big city.","Я живу в большом городе."],"village":["My grandmother lives in a village.","Моя бабушка живёт в деревне."],"sun":["The sun is bright.","Солнце яркое."],"rain":["I like the rain.","Мне нравится дождь."],"snow":["The snow is white.","Снег белый."],"wind":["The wind is cold.","Ветер холодный."],"cloud":["I see a big cloud.","Я вижу большое облако."],"sky":["The sky is blue.","Небо голубое."],"warm":["It is warm today.","Сегодня тепло."],"storm":["A storm is coming.","Приближается буря."]},"lessons":[{"id":"a1","sec":"Алфавит","e":"A","t":"Буквы A–E","d":"A B C D E","type":"l","items":[0,1,2,3,4],"tip":"В английском 26 букв: 5 гласных (A, E, I, O, U) и 21 согласная. Название буквы (эй, би, си) — это не всегда то, как она звучит в слове."},{"id":"a2","sec":"Алфавит","e":"F","t":"Буквы F–J","d":"F G H I J","type":"l","items":[5,6,7,8,9],"tip":"Не путайте G («джи») и J («джей»). Буква H называется «эйч», а в слове house звучит как лёгкий выдох."},{"id":"a3","sec":"Алфавит","e":"K","t":"Буквы K–O","d":"K L M N O","type":"l","items":[10,11,12,13,14],"tip":"M («эм») и N («эн») звучат похоже, слушайте внимательно. Буква O называется «оу»."},{"id":"a4","sec":"Алфавит","e":"P","t":"Буквы P–T","d":"P Q R S T","type":"l","items":[15,16,17,18,19],"tip":"Q почти всегда идёт вместе с U: queen. Английская R не раскатистая, язык не касается нёба."},{"id":"a5","sec":"Алфавит","e":"Z","t":"Буквы U–Z","d":"U V W X Y Z","type":"l","items":[20,21,22,23,24,25],"tip":"W называется «дабл-ю», то есть «двойное U». В американском английском Z читается «зи», в британском — «зед»."},{"id":"w1","sec":"Слова","e":"👋","t":"Привет!","d":"Приветствия и вежливость","type":"w","items":["Hello","Goodbye","Please","Thank you","Sorry","Yes","No","Good morning"],"tip":"Hello подходит всегда. Hi — короче и неформально. Please и Thank you в английском говорят очень часто."},{"id":"w2","sec":"Слова","e":"🙂","t":"О себе","d":"Имя, дела, семья","type":"w","items":["My name is","How are you?","Fine","I","You","Friend","Mother","Father"],"tip":"В английском нельзя пропускать глагол: I am a student — «Я есть студент». Нельзя сказать «I student»."},{"id":"m1","sec":"Мемы 🔥","e":"😎","t":"Сленг: харизма","d":"rizz, aura, goated…","type":"w","items":["rizz","aura","it's giving","goated","no cap","delulu"],"tip":"Это сленг Gen Z из TikTok: rizz — харизма, aura — ваша «аура» (за позор её теряют), it's giving — «это вайб». В чатах так говорят, а на экзамене лучше обычный английский."},{"id":"w3","sec":"Слова","e":"1️⃣","t":"Числа 1–5","d":"one … five","type":"w","items":["one","two","three","four","five"],"tip":"В слове three звук th — это кончик языка между зубами. Это не «з» и не «с»."},{"id":"w4","sec":"Слова","e":"🔟","t":"Числа 6–10","d":"six … ten","type":"w","items":["six","seven","eight","nine","ten"],"tip":"Eight читается «эйт», а gh не произносится. Многие английские слова пишутся не так, как звучат."},{"id":"m2","sec":"Мемы 🔥","e":"💀","t":"Сленг: «мне конец»","d":"cooked, lock in, touch grass…","type":"w","items":["cooked","crash out","lock in","mid","slop","touch grass"],"tip":"Забыл домашку? I'm cooked. Пора браться за ум? Lock in. Слишком долго сидишь в телефоне? Тебе скажут: touch grass."},{"id":"w5","sec":"Слова","e":"🍞","t":"Еда и напитки","d":"В кафе","type":"w","items":["bread","water","milk","tea","coffee","apple","meat","soup"],"tip":"В английском важно ударение: COF-fee, AP-ple. Ударный слог произносится громче и чуть длиннее."},{"id":"w6","sec":"Слова","e":"🧳","t":"Путешествие","d":"В дороге","type":"w","items":["Where?","station","airport","ticket","hotel","street","How much?","Help!"],"tip":"Полезная конструкция: Where is …? значит «Где …?». Попробуйте: Where is the station?"},{"id":"w7","sec":"Слова","e":"🐶","t":"Животные","d":"dog, cat, bird…","type":"w","items":["dog","cat","bird","fish","horse","cow","rabbit","bear","wolf","tiger"],"tip":"Животные в английском: a dog, a cat. Перед словом в единственном числе обычно стоит a: a dog, a bird."},{"id":"w8","sec":"Слова","e":"🎨","t":"Цвета","d":"red, blue, green…","type":"w","items":["red","blue","green","yellow","black","white","pink","purple"],"tip":"Цвет ставится перед предметом: a red apple, a blue pen. В русском наоборот, поэтому тренируйтесь."},{"id":"w9","sec":"Слова","e":"🏫","t":"Школа","d":"book, teacher, homework…","type":"w","items":["book","pen","teacher","student","school","homework","test","lesson","phone","game"],"tip":"Слова для школы пригодятся каждый день. Homework — это не множественное число: говорим my homework."},{"id":"w10","sec":"Слова","e":"🏃","t":"Глаголы","d":"go, eat, play…","type":"w","items":["go","eat","drink","play","read","write","sleep","run","watch","like"],"tip":"Глагол — главное слово действия: I eat, I play, I sleep. С he/she/it добавляем -s: she plays."},{"id":"w11","sec":"Слова","e":"⏰","t":"Время","d":"today, tomorrow, night…","type":"w","items":["today","tomorrow","yesterday","morning","evening","night","week","day"],"tip":"Слова времени ставят в начало или конец: Today I play. I play today."},{"id":"w12","sec":"Слова","e":"🏠","t":"Дом","d":"house, room, bed…","type":"w","items":["house","room","door","window","bed","table","chair","kitchen"],"tip":"My house, my room, my bed. Притяжательное my значит «мой, моя, моё»."},{"id":"s1","sec":"Предложения","e":"🧱","t":"Я есть…","d":"I am, you are, he is","type":"w","sent":1,"items":["I am a student.","You are my friend.","He is a doctor.","She is very happy.","We are at home.","They are my family."],"tip":"Простое предложение: кто + am/is/are + кто или какой. I → am, he/she/it → is, you/we/they → are. В английском глагол нельзя пропускать."},{"id":"s2","sec":"Предложения","e":"🔧","t":"Что я делаю","d":"Порядок слов","type":"w","sent":1,"items":["I like coffee.","She likes tea.","I want some water.","He drinks milk.","They have a cat.","I live in a big city."],"tip":"Порядок слов почти всегда такой: кто → что делает → что или где. К he/she/it в настоящем времени добавляется -s: she likes."},{"id":"s3","sec":"Предложения","e":"❓","t":"Вопросы и «не»","d":"Do you…? I do not…","type":"w","sent":1,"items":["Do you like pizza?","Where is my phone?","I do not know.","What is your name?","Can you help me?","I do not like tea."],"tip":"В вопросе вперёд выходит помощник: Do you like…? Can you…? Для «не» ставим not после помощника: I do not know."},{"id":"s5","sec":"Предложения","e":"⏪","t":"Прошлое","d":"was, went, did not","type":"w","sent":1,"items":["I was at home.","She went to school.","We ate pizza yesterday.","He watched a movie.","I did not sleep well.","They played games all night."],"tip":"Прошлое: I was / we were. У многих глаголов добавляется -ed (watched), а некоторые особые: go → went, eat → ate. Для «не» ставим did not + глагол в обычной форме."},{"id":"s6","sec":"Предложения","e":"🚀","t":"Планы и желания","d":"will, want to, can","type":"w","sent":1,"items":["I want to learn English.","I will call you tomorrow.","We are going to travel.","She can speak English.","I must go now.","Let us start the game."],"tip":"Будущее: will + глагол. Желание и план: want to / going to + глагол. После can, must и will глагол идёт без to: I can go."},{"id":"s8","sec":"Предложения","e":"🎬","t":"Что происходит сейчас","d":"am/is/are + -ing","type":"w","items":["I am reading a book.","She is playing a game.","We are watching a movie.","He is running in the park.","What are you doing?","They are eating lunch."],"tip":"Действие прямо сейчас: am/is/are + глагол с -ing. I am reading, she is playing.","sent":1},{"id":"m3","sec":"Мемы 🔥","e":"🧠","t":"Сленг: интернет","d":"skibidi, 6-7, brainrot…","type":"w","items":["skibidi","6-7","brainrot","yapping","NPC","Chat, is this real?"],"tip":"Skibidi и 6-7 не имеют точного смысла: смешно именно поэтому. Brainrot — шуточное название эпохи бесконечных мемов, а «Chat, is this real?» любят стримеры."},{"id":"s4","sec":"Мемы 🔥","e":"🤡","t":"Собери мем","d":"Предложения в мемном стиле","type":"w","sent":1,"items":["Bro is cooked.","This pizza is mid.","You need to touch grass.","I need to lock in.","He has so much rizz.","My brain is rotting."],"tip":"Тот же порядок слов, только фразы из интернета. Если справишься, уже можешь комментировать мемы по-английски."},{"id":"s7","sec":"Мемы 🔥","e":"🎬","t":"Стрим-сленг","d":"Чат, клипы, стримы","type":"w","sent":1,"items":["Chat is going crazy.","That clip went viral.","Drop the link in chat.","The stream just started.","I watch streams every night.","Please like and subscribe."],"tip":"Фразы, которые пригодятся в мире стримов и клипов. Порядок слов тот же: кто → что делает → что или где."},{"id":"m4","sec":"Мемы 🔥","e":"🌾","t":"Сленг 2026","d":"aura farming, ragebait, slay…","type":"w","items":["aura farming","vibe coding","ragebait","doomscrolling","low-key","slay"],"tip":"Слова из лент 2025–2026: aura farming — «качать ауру», vibe coding — программировать вместе с ИИ, ragebait — наживка для гнева, doomscrolling — бесконечная лента."},{"id":"m5","sec":"Мемы 🔥","e":"🏆","t":"Победа и вайб","d":"big W, glow up, side quest…","type":"w","items":["big W","glow up","side quest","rent free","main character"],"tip":"W — от win (победа), L — от loss (поражение). Big W значит «вот это победа!». Главный герой — main character."},{"id":"s9","sec":"Мемы 🔥","e":"🤳","t":"Собери мем 2","d":"Фразы из мемов","type":"w","items":["That was a huge win.","Her glow up is crazy.","He lives in my head rent free.","Stop doomscrolling and sleep.","I am vibe coding a game.","This is just ragebait."],"tip":"Мемные фразы строятся как обычные: кто → что делает → что. Собери их по порядку слов.","sent":1},{"id":"s10","sec":"Мемы 🔥","e":"🎤","t":"Собери мем 3","d":"Ещё мемные фразы","type":"w","items":["She slayed that speech.","Let us do a side quest.","He is aura farming.","This game is low-key hard.","I am the main character today.","Chat, drop a link here."],"tip":"Последний мемный набор: теперь ты можешь комментировать мемы по-английски.","sent":1},{"id":"w13","sec":"Ещё слова","e":"🧍","t":"Тело","d":"head, hand, eye…","type":"w","items":["head","hand","leg","eye","ear","mouth","nose","face"],"tip":"Части тела с my: my head, my hand. Слово eye («глаз») читается «ай», как буква I, а ear — «иэ»."},{"id":"w14","sec":"Ещё слова","e":"👕","t":"Одежда","d":"shirt, hat, coat…","type":"w","items":["shirt","pants","shoes","hat","coat","dress","socks","jacket"],"tip":"Pants, shoes и socks всегда во множественном числе, ведь это пары. Говорим: my shoes are new."},{"id":"w15","sec":"Ещё слова","e":"✨","t":"Какой?","d":"big, small, hot…","type":"w","items":["big","small","hot","cold","new","old","good","bad"],"tip":"Прилагательное стоит перед словом: a big house. А после is/are оно стоит отдельно: The house is big."},{"id":"w16","sec":"Ещё слова","e":"🏙️","t":"Места","d":"park, shop, bank…","type":"w","items":["park","shop","bank","cinema","library","hospital","city","village"],"tip":"Место обычно идёт с in или to: I live in a city, I go to the shop."},{"id":"w17","sec":"Ещё слова","e":"☀️","t":"Погода","d":"sun, rain, snow…","type":"w","items":["sun","rain","snow","wind","cloud","sky","warm","storm"],"tip":"О погоде говорят с it: It is warm. It is cold. А слова sun, rain, snow — это сама погода."},{"id":"s11","sec":"Ещё предложения","e":"🌅","t":"Мой день","d":"at seven, at noon…","type":"w","items":["I wake up at seven.","I brush my teeth.","I eat breakfast at home.","She goes to work by bus.","We have lunch at noon.","He goes to bed at ten."],"tip":"Время начинается с at: at seven, at ten. С he/she/it добавляем -s или -es: she goes, he eats.","sent":1},{"id":"s12","sec":"Ещё предложения","e":"👨‍👩‍👧","t":"Моя семья","d":"has, have, love","type":"w","items":["My mother is kind.","My father works a lot.","I have a big family.","She has two brothers.","He has a little sister.","We love our grandmother."],"tip":"I/you/we/they have, а he/she/it has: I have a family, she has two brothers.","sent":1},{"id":"s13","sec":"Ещё предложения","e":"☕","t":"В кафе","d":"I would like…","type":"w","items":["I would like some tea.","Can I have the menu?","The soup is very hot.","How much is the coffee?","The bill, please.","I do not eat meat."],"tip":"Вежливая просьба: I would like… («я бы хотел…»). Спросить можно так: Can I have…? Про цену: How much is…?","sent":1},{"id":"s14","sec":"Ещё предложения","e":"🧭","t":"Где это?","d":"left, right, straight","type":"w","items":["Where is the bank?","Turn left here.","Go straight ahead.","The park is near.","I live far from school.","The shop is open."],"tip":"Для дороги нужны команды: Turn left (налево), Turn right (направо), Go straight (прямо).","sent":1},{"id":"s15","sec":"Ещё предложения","e":"🌧️","t":"Погода и чувства","d":"It is…, I am…","type":"w","items":["It is cold today.","It is raining now.","The sun is bright.","I am very tired.","She is not sad.","We are hungry."],"tip":"Погода: It is cold. Чувства: I am tired. Глагол is/am/are нельзя пропускать.","sent":1},{"id":"s16","sec":"Ещё предложения","e":"🎸","t":"Хобби","d":"I love, I like to…","type":"w","items":["I love music.","He plays football every day.","She draws very well.","We like to swim.","They watch cartoons.","I read books at night."],"tip":"Ты любишь делать что-то? Ставь like to / love to + глагол: We like to swim. С he/she/it добавляется -s: he plays.","sent":1},{"id":"s17","sec":"Ещё предложения","e":"❓","t":"Вопросы: what, who, why","d":"what, who, why, when","type":"w","items":["What time is it?","Who is your friend?","Why are you sad?","When is the lesson?","Where do you live?","How old are you?"],"tip":"Вопросительное слово ставится в начало: What, Who, Why, When, Where, How. После него идёт is/are или do: Where do you live?","sent":1},{"id":"s18","sec":"Ещё мемы 🔥","e":"🤪","t":"Собери мем 4","d":"mid, cooked, delulu…","type":"w","items":["That was so mid.","No cap, this song is goated.","My aura is gone.","She is so delulu.","Stop yapping, bro.","I am so cooked."],"tip":"Ещё мемные фразы с порядком слов, как в обычном английском. Собери их, и можно писать комментарии по-английски.","sent":1}]}</script>
 
 <script>
 try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();try{Telegram.WebApp.setHeaderColor("#0a0c16");Telegram.WebApp.setBackgroundColor("#0a0c16")}catch(e){}}}catch(e){}
@@ -213,13 +229,83 @@ const MEMES=[
 ["glow up","SUMMER BEGINS","BIG GLOW UP","✨","😎","#be185d","#fb923c","Началось лето: большое преображение"],
 ["Chat, is this real?","NEW UPDATE JUST DROPPED","CHAT, IS THIS REAL?","👀","🎮","#1e1b4b","#8b5cf6","Вышло новое обновление. Чат, это реально?"],
 ["big W","FOUND MY LOST KEYS","BIG W","🏆","🔑","#166534","#fbbf24","Нашёл потерянные ключи: большая победа"],
-["rent free","THAT SONG LIVES IN MY HEAD","RENT FREE","🎶","🏠","#0e7490","#f472b6","Эта песня живёт у меня в голове бесплатно"]
+["rent free","THAT SONG LIVES IN MY HEAD","RENT FREE","🎶","🏠","#0e7490","#f472b6","Эта песня живёт у меня в голове бесплатно"],
+["rizz","HE JUST SAID HI","UNSPOKEN RIZZ","😏","💘","#831843","#f43f5e","Он просто сказал «привет»: неземная харизма"],
+["skibidi","WHY IS EVERYONE SAYING","SKIBIDI?","🌀","🤨","#164e63","#22d3ee","Почему все вокруг говорят «скибиди»?"],
+["yapping","ME EXPLAINING MY DREAM","YAPPING FOR 20 MIN","🗣️","😴","#713f12","#f59e0b","Я 20 минут рассказываю свой сон"],
+["no cap","BEST PIZZA EVER","NO CAP","🧢","🍕","#1e3a8a","#38bdf8","Лучшая пицца в жизни, без обмана"],
+["it's giving","NEW HAIRCUT","IT'S GIVING MAIN CHARACTER","💇","🌟","#6b21a8","#f0abfc","Новая стрижка: вайб главного героя"],
+["crash out","WIFI DISCONNECTED","CRASHING OUT","📶","🤯","#7f1d1d","#fb7185","Вайфай пропал. Я психую"],
+["slay","PRESENTATION DONE","SLAY","💅","🎤","#86198f","#f472b6","Презентация готова: блестяще"],
+["low-key","I SAY I DON'T CARE","LOW-KEY I DO","🙈","❤️","#0f766e","#a3e635","Говорю, что всё равно. А на самом деле нет"],
+["main character","WALKING WITH HEADPHONES","MAIN CHARACTER MODE","🎧","🌆","#1e293b","#f97316","Иду в наушниках: режим главного героя"]
 ].map(a=>({w:a[0],top:a[1],bot:a[2],e:a[3],e2:a[4],c1:a[5],c2:a[6],ru:a[7]}));
 let _mid=0,mi=Math.floor(Date.now()/864e5)%MEMES.length;
 function wrapT(t,n){const L=[];let c="";t.split(" ").forEach(w=>{if(c&&(c+" "+w).length>n){L.push(c);c=w}else c=c?c+" "+w:w});if(c)L.push(c);return L}
+const SC={"6-7":"wide open spark","aura":"cool smirk glow","touch grass":"dizzy flat rain","lock in":"angry flat spark","mid":"sleepy flat none","slop":"dizzy flat rain","vibe coding":"cool grin spark","ragebait":"angry open anger","aura farming":"cool smirk glow","brainrot":"dizzy open spark","NPC":"wide flat none","delulu":"heart smile heart","goated":"cool grin spark","doomscrolling":"sleepy flat zzz","side quest":"wide smile spark","glow up":"cool grin spark","Chat, is this real?":"wide open spark","big W":"happy grin spark","rent free":"happy smile heart","rizz":"cool smirk heart","skibidi":"dizzy open spark","yapping":"happy open none","no cap":"cool smile spark","it's giving":"cool smirk spark","crash out":"angry open fire","slay":"cool grin spark","low-key":"smirk smirk heart","main character":"cool smile glow","cooked":"wide open fire"};
+function cha(o){
+  const k=o.k,W=x=>`<circle cx="${x}" cy="-2" r="15" fill="#fff" stroke="#000" stroke-width="2.5"/><circle cx="${x+2}" cy="1" r="5" fill="#000"/>`,
+  A=x=>`<path d="M${x-13} 0Q${x} -14 ${x+13} 0" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>`,
+  Z=x=>`<path d="M${x-13} 0H${x+13}" stroke="#000" stroke-width="5" stroke-linecap="round"/>`,
+  H=x=>`<circle cx="${x}" cy="0" r="12" fill="#fff" stroke="#000" stroke-width="2.5"/><circle cx="${x+2}" cy="3" r="5" fill="#000"/><path d="M${x-14} -3H${x+14}" stroke="#000" stroke-width="5"/>`,
+  G=x=>`<text x="${x}" y="10" font-size="28" text-anchor="middle" fill="#ef4444">♥</text>`,
+  D=x=>`<text x="${x}" y="9" font-size="30" text-anchor="middle" fill="#000" font-family="Anton,Impact,sans-serif">@</text>`,
+  N=x=>`<circle cx="${x}" cy="0" r="9" fill="#fff" stroke="#000" stroke-width="2.5"/><circle cx="${x+1}" cy="2" r="4" fill="#000"/>`;
+  const E={wide:W(-22)+W(22),happy:A(-22)+A(22),sleepy:Z(-22)+Z(22),smirk:H(-22)+H(22),heart:G(-22)+G(22),dizzy:D(-22)+D(22),
+   angry:N(-22)+N(22)+'<path d="M-38 -16L-8 -6M38 -16L8 -6" stroke="#2b1b12" stroke-width="6" stroke-linecap="round"/>',
+   cool:'<rect x="-40" y="-14" width="36" height="22" rx="7" fill="#0b0b0b"/><rect x="4" y="-14" width="36" height="22" rx="7" fill="#0b0b0b"/><path d="M-4 -5H4" stroke="#0b0b0b" stroke-width="4"/><path d="M-34 -8H-22M10 -8H22" stroke="#fff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>'}[k];
+  const st='fill="none" stroke="#7a3e1d" stroke-width="4.5" stroke-linecap="round"';
+  const M={open:'<ellipse cx="0" cy="32" rx="12" ry="16" fill="#5b1a1a"/>',smile:`<path d="M-18 26Q0 44 18 26" ${st}/>`,flat:`<path d="M-14 34H14" ${st}/>`,smirk:`<path d="M-16 34Q6 46 20 26" ${st}/>`,grin:'<path d="M-22 24Q0 54 22 24Z" fill="#fff" stroke="#7a3e1d" stroke-width="4" stroke-linejoin="round"/>'}[o.mo];
+  const Hr=[`<path d="M-52 -18L-44 -56L-22 -34L-10 -66L8 -36L28 -64L34 -32L56 -52L52 -16Q0 -42 -52 -18Z" fill="${o.hc}"/>`,`<path d="M-54 -10Q-50 -62 0 -62Q50 -62 54 -10Z" fill="${o.hc}"/><rect x="10" y="-18" width="62" height="12" rx="6" fill="${o.hc}"/>`,`<circle cx="-30" cy="-42" r="22" fill="${o.hc}"/><circle cx="0" cy="-52" r="24" fill="${o.hc}"/><circle cx="30" cy="-42" r="22" fill="${o.hc}"/>`][o.hd];
+  return `<path d="M-98 150Q-92 54 0 46Q92 54 98 150Z" fill="${o.bd}"/><path d="M-26 48Q0 78 26 48" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="4"/><rect x="-16" y="36" width="32" height="22" rx="10" fill="${o.sk}"/><circle cx="-54" cy="6" r="10" fill="${o.sk}"/><circle cx="54" cy="6" r="10" fill="${o.sk}"/><circle r="54" fill="${o.sk}"/>${Hr}${E}${M}`;
+}
+function fxs(k){
+  const tx=(a,f)=>`<g class="fy" text-anchor="middle" fill="${f}">${a}</g>`;
+  if(k==="spark")return tx('<text x="60" y="90" font-size="24">✦</text><text x="400" y="80" font-size="30">✦</text><text x="610" y="240" font-size="22">✦</text>',"#fff");
+  if(k==="heart")return tx('<text x="330" y="110" font-size="34">♥</text><text x="40" y="120" font-size="26">♥</text><text x="400" y="250" font-size="22">♥</text>',"#fb7185");
+  if(k==="zzz")return tx('<text x="300" y="110" font-size="40">Z</text><text x="340" y="80" font-size="30">z</text><text x="370" y="56" font-size="22">z</text>',"#e0e7ff");
+  if(k==="anger")return `<text class="fy" x="300" y="100" font-size="56" text-anchor="middle">💢</text>`;
+  if(k==="glow")return '<g fill="none" stroke="#ffd166" stroke-width="5"><circle class="pl" cx="210" cy="165" r="120"/><circle class="pl pl2" cx="210" cy="165" r="120"/><circle class="pl pl3" cx="210" cy="165" r="120"/></g>';
+  if(k==="rain"){let r="";for(let i=0;i<7;i++)r+=`<path class="dr" style="animation-delay:${i*.3}s" transform="translate(${60+i*80} ${70+(i%3)*50})" d="M0 -11C7 0 9 7 0 11C-9 7 -7 0 0 -11Z" fill="#7dd3fc" stroke="#0369a1" stroke-width="2"/>`;return r}
+  if(k==="fire"){let r="";for(let i=0;i<9;i++)r+=`<g transform="translate(${20+i*75} 300) scale(${1.6+(i%3)*.5})"><path class="fk" style="animation-delay:${i*.13}s" d="M0 0C-16 -22 -6 -38 -3 -58C16 -38 26 -20 14 0Z" fill="#f97316"/><path class="fk" style="animation-delay:${i*.13+.1}s" d="M2 0C-7 -12 -2 -22 0 -34C9 -22 14 -11 8 0Z" fill="#fde047"/></g>`;return r}
+  return "";
+}
 function memeSVG(m){
-  const id="mg"+(_mid++),tl=wrapT(m.top,20),bl=wrapT(m.bot,20),tx=(L,y)=>L.map((t,k)=>`<text x="160" y="${y+k*32}">${t}</text>`).join("");
-  return `<svg class="msvg" viewBox="0 0 320 320" role="img" aria-label="${m.top} ${m.bot}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m.c1}"/><stop offset="1" stop-color="${m.c2}"/></linearGradient></defs><rect width="320" height="320" fill="url(#${id})"/><circle cx="50" cy="270" r="70" fill="#fff" opacity=".07"/><circle cx="290" cy="90" r="90" fill="#fff" opacity=".07"/><text x="160" y="200" font-size="100" text-anchor="middle">${m.e}</text><text x="262" y="160" font-size="44" text-anchor="middle" transform="rotate(12 262 160)">${m.e2}</text><g font-family="Anton,Impact,'Arial Black',sans-serif" font-size="26" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${tx(tl,38)}${tx(bl,298-(bl.length-1)*32)}</g></svg>`;
+  if(m.w==="cooked"&&m.bot!=="???")return memeBanner();
+  const id="mg"+(_mid++),i=MEMES.findIndex(x=>x.w===m.w),c=(SC[m.w]||"wide open spark").split(" "),
+  tl=wrapT(m.top,24),bl=wrapT(m.bot,22),T='font-family="Anton,Impact,\'Arial Black\',sans-serif" text-anchor="middle" stroke="#000" stroke-linejoin="round" paint-order="stroke" fill="#fff"',
+  ch=cha({k:c[0],mo:c[1],sk:["#f1c27d","#e0ac69","#c68642","#8d5524","#ffdbac"][i%5],hc:["#2b1b12","#4a2c17","#111827","#7c2d12","#b45309"][(i*2)%5],hd:i%3,bd:["#334155","#6d28d9","#0f766e","#be123c","#1d4ed8"][i%5]}),
+  st='stroke="#fff" stroke-width="9" stroke-linejoin="round" paint-order="stroke" filter="url(#'+id+'s)" text-anchor="middle"';
+  let rays="";for(let k=0;k<16;k++){const a=k*Math.PI/8,b=a+Math.PI/16,P=t=>(210+520*Math.cos(t)).toFixed(0)+" "+(165+520*Math.sin(t)).toFixed(0);rays+=`<path d="M210 165L${P(a)}L${P(b)}Z"/>`}
+  return `<svg class="msvg" viewBox="0 0 640 300" role="img" aria-label="${m.top} ${m.bot}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m.c1}"/><stop offset="1" stop-color="${m.c2}"/></linearGradient><radialGradient id="${id}v" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient><radialGradient id="${id}g" cx=".33" cy=".55" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><filter id="${id}s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".5"/></filter></defs>
+<rect width="640" height="300" fill="url(#${id})"/><g class="sp" fill="#fff" opacity=".09">${rays}</g><rect width="640" height="300" fill="url(#${id}g)"/>${fxs(c[2])}
+<g transform="translate(210 160)" filter="url(#${id}s)">${ch}</g>
+<g ${st}><text class="fy" x="505" y="205" font-size="100">${m.e}</text><text x="585" y="100" font-size="46" transform="rotate(12 585 100)">${m.e2}</text></g>
+<rect width="640" height="300" fill="url(#${id}v)"/>
+<g ${T} font-size="28" stroke-width="6">${tl.map((t,k)=>`<text x="320" y="${40+k*32}">${t}</text>`).join("")}</g><g ${T} font-size="42" stroke-width="7" fill="#fde047">${bl.map((t,k)=>`<text x="320" y="${288-(bl.length-1-k)*44}">${t}</text>`).join("")}</g>
+<text x="628" y="294" font-size="10" fill="#fff" opacity=".55" text-anchor="end" font-family="Inter,sans-serif">2026</text></svg>`;
+}
+function memeBanner(){
+  const T='font-family="Anton,Impact,\'Arial Black\',sans-serif" text-anchor="middle" stroke="#000" stroke-linejoin="round" paint-order="stroke"';
+  let fl="";[[96,1.5],[134,2],[172,1.7],[216,2.3],[262,1.8],[304,2.1],[344,1.6],[378,1.9]].forEach((f,k)=>{fl+=`<g transform="translate(${f[0]} 238) scale(${f[1]})"><path class="fk" style="animation-delay:${k*.17}s" d="M0 0C-16 -22 -6 -38 -3 -58C16 -38 26 -20 14 0Z" fill="#f97316"/><path class="fk" style="animation-delay:${k*.17+.1}s" d="M2 0C-7 -12 -2 -22 0 -34C9 -22 14 -11 8 0Z" fill="#fde047"/></g>`});
+  const sk="#f1c27d",dr=(x,y,d)=>`<path class="dr" style="animation-delay:${d}s" transform="translate(${x} ${y})" d="M0 -11C7 0 9 7 0 11C-9 7 -7 0 0 -11Z" fill="#7dd3fc" stroke="#0369a1" stroke-width="2"/>`;
+  return `<svg viewBox="0 0 640 300" role="img" aria-label="HOMEWORK DUE IN 5 MIN: I'M COOKED"><defs><linearGradient id="ck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a0a0a"/><stop offset=".6" stop-color="#9a2a0c"/><stop offset="1" stop-color="#f97316"/></linearGradient><radialGradient id="cg" cx=".4" cy=".75" r=".55"><stop offset="0" stop-color="#fde047" stop-opacity=".6"/><stop offset="1" stop-color="#fde047" stop-opacity="0"/></radialGradient><radialGradient id="cv" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient><filter id="cs" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".5"/></filter></defs>
+<rect width="640" height="300" fill="url(#ck)"/><rect width="640" height="300" fill="url(#cg)"/>${fl}
+<g filter="url(#cs)"><rect x="372" y="206" width="150" height="22" rx="11" fill="#111827" transform="rotate(7 372 217)"/><ellipse cx="230" cy="215" rx="150" ry="55" fill="#374151"/><ellipse cx="230" cy="215" rx="136" ry="46" fill="#111827"/>
+<path d="M165 222Q172 190 230 190Q288 190 295 222Z" fill="#3b82f6"/>
+<circle cx="230" cy="150" r="52" fill="${sk}"/><path d="M178 132L184 96L204 116L214 84L232 112L252 86L256 116L278 96L282 134Q230 108 178 132Z" fill="#2b1b12"/>
+<circle cx="208" cy="148" r="15" fill="#fff" stroke="#000" stroke-width="2.5"/><circle cx="252" cy="148" r="15" fill="#fff" stroke="#000" stroke-width="2.5"/><circle cx="210" cy="150" r="5" fill="#000"/><circle cx="250" cy="150" r="5" fill="#000"/>
+<path d="M194 126L220 120M266 126L240 120" stroke="#2b1b12" stroke-width="5" stroke-linecap="round"/><ellipse cx="230" cy="184" rx="13" ry="17" fill="#5b1a1a"/>
+<circle cx="168" cy="168" r="17" fill="${sk}"/><circle cx="292" cy="168" r="17" fill="${sk}"/>
+<path d="M80 215A150 55 0 0 0 380 215Z" fill="#1f2937"/><path d="M80 215A150 55 0 0 0 380 215" fill="none" stroke="#4b5563" stroke-width="12" stroke-linecap="round"/></g>
+${dr(176,118,0)}${dr(284,112,.7)}${dr(160,140,1.4)}
+<g transform="rotate(-14 85 150)" filter="url(#cs)"><rect x="48" y="104" width="76" height="92" rx="4" fill="#fef3c7"/><path d="M58 126H112M58 142H112M58 158H96" stroke="#92400e" stroke-width="4" stroke-linecap="round"/><path d="M48 176L62 168L74 182L88 170L100 184L112 172L124 180V196H48Z" fill="#1f2937"/><path class="fk" d="M70 176C60 160 70 150 72 138C86 152 92 166 86 178Z" fill="#f97316"/></g>
+<g filter="url(#cs)"><circle cx="560" cy="96" r="42" fill="#fff" stroke="#111" stroke-width="6"/><path d="M560 96V68M560 96L578 108" stroke="#111" stroke-width="5" stroke-linecap="round"/><circle cx="530" cy="58" r="10" fill="#ef4444"/><circle cx="590" cy="58" r="10" fill="#ef4444"/></g>
+<text x="560" y="168" font-size="34" fill="#fff" stroke-width="5" ${T}>00:05</text>
+<g fill="#fff" opacity=".9" text-anchor="middle"><text x="30" y="60" font-size="20">✦</text><text x="430" y="150" font-size="18">✦</text></g>
+<rect width="640" height="300" fill="url(#cv)"/>
+<text x="320" y="44" font-size="32" fill="#fff" stroke-width="6" ${T}>HOMEWORK DUE IN 5 MIN</text><text x="320" y="288" font-size="48" fill="#fde047" stroke-width="7" ${T}>I'M COOKED</text>
+<text x="628" y="14" font-size="10" fill="#fff" opacity=".6" text-anchor="end" font-family="Inter,sans-serif">2026</text></svg>`;
 }
 function memeBlock(){
   return `<div class="card hero"><div class="between"><b>😂 Мем дня</b><span class="pill gold">2026</span></div>
@@ -232,19 +318,21 @@ function bindMemes(){
   view.querySelectorAll("[data-m]").forEach(el=>el.onclick=()=>{SFX.pop();openMeme(+el.dataset.m)});
   $("#mhero").onclick=()=>{SFX.pop();openMeme(mi)};
 }
-function closeMeme(){$("#mm").classList.remove("on");if(tab==="home")Home()}
+function memeDot(){const d=$("#hDot");if(d)d.style.display=S.mseen.length<MEMES.length?"block":"none"}
+function closeMeme(){$("#mm").classList.remove("on");memeDot()}
 function openMeme(i){
   const m=MEMES[i],w=WORD[m.w];
   if(!S.mseen.includes(m.w)){S.mseen.push(m.w);touchDay();gainXP(3);save();checkAch()}
   $("#mmbox").innerHTML=`<div class="between"><span class="pill gold">Мем ${i+1}/${MEMES.length}</span><button class="mbtn" id="mx">✕</button></div>
-  <div style="margin:10px 0">${memeSVG(m)}</div>
+  <div style="margin:10px 0">${m.w==="cooked"?memeBanner():memeSVG(m)}</div>
   <div class="center"><div class="en2">${w.en}</div><div class="muted">[${w.tr}] — ${w.ru}</div></div>
   <div class="ex center" id="mtr"><button class="btn ghost" id="mt" style="padding:9px 16px">👁 Показать перевод</button></div>
-  <div class="row"><button class="btn ghost" id="mS">🔊 Слушать</button><button class="btn" id="mN">Дальше →</button></div>`;
+  <div class="row"><button class="btn ghost" id="mP" style="flex:.5">←</button><button class="btn ghost" id="mS">🔊</button><button class="btn" id="mN">Дальше →</button></div>`;
   $("#mm").classList.add("on");
   $("#mx").onclick=closeMeme;
   $("#mt").onclick=()=>{$("#mtr").innerHTML=`<div class="muted">Перевод подписи</div><div>${m.ru}</div>`;SFX.flip()};
   $("#mS").onclick=()=>say(m.w==="6-7"?"six seven":m.w);
+  $("#mP").onclick=()=>{SFX.tap();openMeme((i+MEMES.length-1)%MEMES.length)};
   $("#mN").onclick=()=>{SFX.tap();openMeme((i+1)%MEMES.length)};
   say(m.w==="6-7"?"six seven":m.w);
 }
@@ -451,7 +539,7 @@ function confetti(n){
 }
 function hud(){
   $("#hStreak").textContent="🔥 "+S.streak;
-  $("#hLv").textContent="Ур. "+level()+" · "+S.xp+" XP";
+  $("#hLv").textContent="Ур. "+level()+" · "+S.xp+" XP";memeDot();
 }
 function gainXP(n){
   const old=level();S.xp+=n;
@@ -474,7 +562,8 @@ const ACH=[
  ["lesall","🌟","Знаток","Пройдите все уроки",()=>Object.keys(S.lessons).length>=LESSONS.length],
  ["mem8","😂","Мемолог","Откройте 8 мемов",()=>S.mseen.length>=8],
  ["memall","🤣","Король мемов","Откройте все мемы",()=>S.mseen.length>=MEMES.length],
- ["games","🕹️","Игроман","Сыграйте во все игры",()=>Object.keys(S.bests).length>=12]
+ ["games","🕹️","Игроман","Сыграйте во все игры",()=>Object.keys(S.bests).length>=13],
+ ["mine5","✍️","Автор","Составьте 5 своих фраз",()=>(S.mine||[]).length>=5]
 ];
 function checkAch(){
   ACH.forEach(a=>{if(!S.ach.includes(a[0])&&a[4]()){S.ach.push(a[0]);save();SFX.ach();toast(a[1]+" Достижение: <b>"+a[2]+"</b>")}});
@@ -519,6 +608,7 @@ function Home(){
   const lvPct=S.xp%100;
   const nl=LESSONS.find(l=>!S.lessons[l.id]);
   view.innerHTML=`
+  <div class="mban" id="mban">${memeBanner()}</div>
   <div class="card hero">
     <div class="between">
       <div><div class="muted">${S.streak>0?"🔥 Серия: "+S.streak+" дн. подряд":"Начните серию сегодня"}</div>
@@ -529,7 +619,6 @@ function Home(){
     <div class="bar"><div style="width:${lvPct}%"></div></div>
     <div class="muted">Уровень ${level()} · до следующего ${100-lvPct} XP</div>
   </div>
-  ${memeBlock()}
   <div class="card">
     <div class="between"><span class="muted">✨ Слово дня</span><span class="muted">${TOPICS[wd.topic].title}</span></div>
     <div class="center"><div class="en">${wd.en}</div><div class="muted">[${wd.tr}] — ${wd.ru}</div></div>
@@ -539,7 +628,7 @@ function Home(){
     <div class="bar"><div style="width:${pct}%"></div></div></div>
   ${nl?`<button class="btn gold" onclick="go('learn')" style="width:100%;margin-top:4px">📘 Продолжить: ${nl.t}</button>`:`<div class="card center">🌟 Вы прошли весь курс!</div>`}
   <div class="row"><button class="btn ghost" onclick="go('play')">🎮 Игры</button><button class="btn ghost" onclick="go('words')">📚 Слова</button></div>`;
-  $("#wdS").onclick=()=>say(wd.en);bindMemes();
+  $("#wdS").onclick=()=>say(wd.en);$("#mban").onclick=()=>{SFX.pop();openMeme(MEMES.findIndex(m=>m.w==="cooked"))};
   $("#wdF").onclick=()=>{toggleFav(wd.en);Home()};
 }
 function toggleFav(en){
@@ -598,13 +687,20 @@ function Play(){
   <button class="game" data-g="tf"><div class="e">✅</div><b>Верно или нет</b><span>${B("tf")}/10</span></button>
   <button class="game" data-g="gap"><div class="e">🕳️</div><b>Пропуск слова</b><span>${B("gap")}/10</span></button>
   <button class="game" data-g="sentence"><div class="e">🧱</div><b>Собери фразу</b><span>${B("sentence")}/6</span></button>
+  <button class="game" data-g="type"><div class="e">✍️</div><b>Напиши сам</b><span>${B("type")}/8</span></button>
+  <button class="game" data-g="sent2"><div class="e">🪤</div><b>Фразы с ловушками</b><span>${B("sent2")}/6</span></button>
+  <button class="game" data-g="shop"><div class="e">🛠️</div><b>Мастерская фраз</b><span>Свои предложения: ${(S.mine||[]).length}</span></button>
+  <button class="game" data-g="song"><div class="e">🎤</div><b>Моя песня</b><span>Песен: ${(S.songs||[]).length}</span></button>
+  <button class="game" data-g="sing"><div class="e">🎵</div><b>Спой на английском</b><span>Спето: ${S.sung||0}</span></button>
   </div><div class="muted center" style="margin-top:14px">За каждый правильный ответ +10 XP</div>`;
   view.querySelectorAll(".game").forEach(b=>b.onclick=()=>{SFX.pop();startGame(b.dataset.g)});
 }
 function startGame(id){
   nav();redraw=null;
   if(id==="cards")return cardsGame();
-  if(["meme","memecap","speed","tf","gap","sentence"].includes(id))return game2(id);
+  if(id==="song")return songGame();
+  if(id==="sing")return singGame();
+  if(["meme","memecap","speed","tf","gap","sentence","type","sent2","shop"].includes(id))return game2(id);
   if(id==="match")return matchGame();
   if(id==="build")return buildGame();
   const distract=(w,key)=>shuffle(ALL.filter(x=>x[key]!==w[key])).slice(0,3);
@@ -777,7 +873,9 @@ function game2(id){
       return{prompt:`<div class="muted">Вставь пропущенное слово</div><div class="en2" style="font-size:24px">${t.map((z,j)=>j===k?"_____"+(/[.?!,]$/.test(z)?z.slice(-1):""):z).join(" ")}</div><div class="muted">${w[2]}</div>`,say:w[0],opts:shuffle([{t:a,ok:1},...shuffle(bank.filter(b=>b!==a)).slice(0,3).map(b=>({t:b}))])}});
   }
   if(id==="speed")return speedGame();
-  return sentGame();
+  if(id==="type")return typeGame();
+  if(id==="shop")return shopGame();
+  return sentGame(id==="sent2");
 }
 function speedGame(){
   const my=VT,pool=[...ALL,...MEMES.map(m=>WORD[m.w])];let t=30,score=0,locked=false;
@@ -791,19 +889,19 @@ function speedGame(){
   q();
   const iv=setInterval(()=>{if(my!==VT){clearInterval(iv);return}t--;const e=$("#tm");if(e){e.textContent=t+" c";$("#tb").style.width=Math.max(0,t)/30*100+"%"}if(t<=0){clearInterval(iv);finish("speed","Блиц 30 секунд",Math.min(score,20),20)}},1000);
 }
-function sentGame(){
+function sentGame(extra){
   const pool=shuffle(TOPICS.sent.words.filter(w=>{const n=w[0].split(" ").length;return n>=4&&n<=7})).slice(0,6);let r=0,score=0;
   function round(){
-    if(r>=pool.length)return finish("sentence","Собери фразу",score,pool.length);
-    const w=pool[r],tk=w[0].split(" ");let L=shuffle(tk);if(L.join(" ")===w[0])L.reverse();
+    if(r>=pool.length)return finish(extra?"sent2":"sentence",extra?"Фразы с ловушками":"Собери фразу",score,pool.length);
+    const w=pool[r],tk=w[0].split(" ");const ex=extra?shuffle([...new Set(TOPICS.sent.words.flatMap(x=>x[0].replace(/[.?!,]/g,"").split(" ")))].filter(z=>!tk.includes(z))).slice(0,3):[];let L=shuffle(tk.concat(ex));if(L.join(" ")===w[0])L.reverse();
     let sel=[],failed=false,locked=false;
     function draw(){
-      view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">Собери фразу · ${r+1}/${pool.length}</div><div class="bar"><div style="width:${r/pool.length*100}%"></div></div>
+      view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">${extra?"Лишние слова есть! ":""}Собери фразу · ${r+1}/${pool.length}</div><div class="bar"><div style="width:${r/pool.length*100}%"></div></div>
       <div class="card center"><div class="en2" style="font-size:24px">${w[2]}</div><div class="muted">[${w[1]}]</div><button class="icon" id="sp" style="margin-top:8px">🔊</button></div>
       <div class="slots wl" id="sl">${sel.map(k=>`<button class="tile w" data-s="${k}">${L[k]}</button>`).join("")||'<span class="muted">Нажимай слова по порядку</span>'}</div>
       <div class="tiles">${L.map((x,k)=>sel.includes(k)?`<button class="tile w used" disabled>${x}</button>`:`<button class="tile w" data-k="${k}">${x}</button>`).join("")}</div>`;
       $("#bk").onclick=Play;$("#sp").onclick=()=>say(w[0]);
-      view.querySelectorAll(".tiles .tile:not(.used)").forEach(t=>t.onclick=()=>{if(locked)return;sel.push(+t.dataset.k);SFX.pop();draw();if(sel.length===L.length)check()});
+      view.querySelectorAll(".tiles .tile:not(.used)").forEach(t=>t.onclick=()=>{if(locked)return;sel.push(+t.dataset.k);SFX.pop();draw();if(sel.length===tk.length)check()});
       view.querySelectorAll("#sl .tile").forEach(t=>t.onclick=()=>{if(locked)return;sel=sel.filter(k=>k!==+t.dataset.s);SFX.tap();draw()});
     }
     function check(){
@@ -814,6 +912,382 @@ function sentGame(){
     draw();
   }
   round();
+}
+
+
+/* ---- type the answer yourself ---- */
+function typeGame(){
+  const pool=shuffle(TOPICS.sent.words).slice(0,8);let r=0,score=0;
+  const nz=t=>t.toLowerCase().replace(/[.?!,]/g,"").replace(/\s+/g," ").trim();
+  function lev(a,b){const m=[];for(let i=0;i<=a.length;i++){m[i]=[i];for(let j=1;j<=b.length;j++)m[i][j]=i?0:j}for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+  function round(){
+    if(r>=pool.length)return finish("type","Напиши сам",score,pool.length);
+    const w=pool[r],c=nz(w[0]);let tries=0,hinted=false,locked=false;
+    view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">Напиши сам · ${r+1}/${pool.length}</div><div class="bar"><div style="width:${r/pool.length*100}%"></div></div>
+    <div class="card center prompt"><div class="muted">Переведи на английский</div><div class="en2" style="font-size:26px">${w[2]}</div><div id="hn2" class="muted" style="min-height:20px"></div></div>
+    <input class="search" id="ti" placeholder="Пиши по-английски…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="note" id="fb">Регистр и знаки препинания не важны</div>
+    <div class="row"><button class="btn ghost" id="hn">💡 Подсказка</button><button class="btn" id="ck">Проверить</button></div>
+    <div class="row"><button class="btn ghost" id="sk">Не знаю</button></div>`;
+    $("#bk").onclick=Play;
+    const next=ms=>later(()=>{r++;round()},ms),ti=$("#ti");
+    $("#hn").onclick=()=>{hinted=true;$("#hn2").textContent="Начало: "+w[0].split(" ").slice(0,2).join(" ")+" … (слов: "+w[0].split(" ").length+")";SFX.tap()};
+    $("#sk").onclick=()=>{if(locked)return;locked=true;answer(false);$("#fb").innerHTML="Ответ: <b>"+w[0]+"</b>";say(w[0]);next(2400)};
+    const check=()=>{
+      if(locked)return;const u=nz(ti.value);if(!u)return;
+      if(u===c||(c.length>10&&lev(u,c)<=1)){locked=true;answer(true);if(!tries&&!hinted)score++;$("#fb").innerHTML=(u===c?"✅ Верно!":"✅ Почти! Правильно так: <b>"+w[0]+"</b>");say(w[0]);next(1500)}
+      else{tries++;answer(false);ti.classList.add("shake");setTimeout(()=>ti.classList.remove("shake"),400);
+        if(tries>=2){locked=true;$("#fb").innerHTML="Ответ: <b>"+w[0]+"</b>";say(w[0]);next(2400)}else $("#fb").textContent="Не совсем. Попробуй ещё раз (подсказка поможет)"}
+    };
+    $("#ck").onclick=check;ti.onkeydown=e=>{if(e.key==="Enter")check()};
+  }
+  round();
+}
+/* ---- workshop: build your own sentences ---- */
+function shopGame(){
+  let sb=0,vb=0,ob=0,md=0;
+  const SU=[["I",0],["You",0],["He",1],["She",1],["We",0],["They",0]],
+  VB=[["like","likes","pizza,music,games,cats,memes,coffee"],["want","wants","water,coffee,pizza,a phone,a cat"],["have","has","a cat,a dog,a phone,a book,a friend"],["play","plays","games,football,music"],["eat","eats","pizza,soup,bread,an apple"],["watch","watches","movies,streams,memes"],["see","sees","a cat,a friend,a movie"]],
+  MD=["Утверждение","Отрицание","Вопрос"];
+  const build=()=>{const [S,t]=SU[sb],[b,s3,os]=VB[vb],O=os.split(","),o=O[Math.min(ob,O.length-1)],aux=t?"does":"do";
+    if(md===0)return S+" "+(t?s3:b)+" "+o+".";
+    if(md===1)return S+" "+aux+" not "+b+" "+o+".";
+    return (t?"Does ":"Do ")+(S==="I"?"I":S.toLowerCase())+" "+b+" "+o+"?"};
+  const row=(arr,cur,k)=>'<div class="chips" style="flex-wrap:wrap;overflow:visible">'+arr.map((x,i)=>`<button class="chip${i===cur?" on":""}" data-k="${k}" data-i="${i}">${x}</button>`).join("")+'</div>';
+  function draw(){
+    S.mine=S.mine||[];const O=VB[vb][2].split(","),sent=build(),t=SU[sb][1];
+    const tip=md===0?(t?"С he/she/it к глаголу добавляем -s: "+VB[vb][1]+".":"С I/you/we/they глагол без изменений: "+VB[vb][0]+"."):md===1?"Отрицание: do/does + not + глагол без -s.":"Вопрос: do/does стоит первым, глагол без -s.";
+    view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">Составь своё предложение. Твоих фраз: ${S.mine.length}</div>
+    <div class="card center"><div class="en2" id="res" style="font-size:28px">${sent}</div><div class="row" style="justify-content:center"><button class="icon" id="sp">🔊</button><button class="btn gold" id="sv" style="flex:none">${S.mine.includes(sent)?"✔ Уже в копилке":"⭐ В копилку +3 XP"}</button></div></div>
+    <div class="tip">💡 ${tip}</div>
+    <div class="muted">Тип</div>${row(MD,md,"m")}<div class="muted">Кто</div>${row(SU.map(x=>x[0]),sb,"s")}<div class="muted">Что делает</div>${row(VB.map(x=>x[0]),vb,"v")}<div class="muted">Что или с чем</div>${row(O,ob,"o")}`;
+    $("#bk").onclick=Play;$("#sp").onclick=()=>say(sent);
+    $("#sv").onclick=()=>{if(S.mine.includes(sent)){SFX.tap();return}S.mine.push(sent);touchDay();gainXP(3);save();checkAch();SFX.ok();toast("⭐ Фраза сохранена!");draw()};
+    view.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const i=+c.dataset.i,k=c.dataset.k;if(k==="m")md=i;if(k==="s")sb=i;if(k==="v"){vb=i;ob=0}if(k==="o")ob=i;SFX.pop();draw();say(build())});
+  }
+  draw();
+}
+
+/* ---- song: paste lyrics, translate, rebuild in English ---- */
+const SONG={mode:"tiles"};
+function songGame(){
+  const my=VT;
+  const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const nzT=t=>t.toLowerCase().replace(/[’`]/g,"'").replace(/[^\p{L}\p{N}'\s-]/gu,"").replace(/\s+/g," ").trim();
+  const lev=(a,b)=>{const m=[];for(let i=0;i<=a.length;i++){m[i]=[i];for(let j=1;j<=b.length;j++)m[i][j]=i?0:j}for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]};
+  async function trLine(t,from,to){
+    const r=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(t)+"&langpair="+from+"|"+to);
+    const j=await r.json(),x=j&&j.responseData&&j.responseData.translatedText;
+    if(!x||+j.responseStatus!==200||/MYMEMORY WARNING|INVALID|QUERY LENGTH/i.test(x))throw new Error("tr");
+    const d=document.createElement("textarea");d.innerHTML=x;return d.value;
+  }
+  function setup(){
+    view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎤 Моя песня</h2>
+    <div class="muted">Вставь отрывок песни (до 12 строк). Сайт переведёт его на английский, а ты соберёшь английскую версию сам.</div>
+    <textarea class="search" id="st" placeholder="Вставь сюда текст песни…" style="min-height:150px;resize:vertical;font-family:var(--sans)">${esc(S.songTxt||"")}</textarea>
+    <div class="muted" style="margin-top:8px">Как собирать</div>
+    <div class="chips"><button class="chip${SONG.mode==="tiles"?" on":""}" data-md="tiles">🧩 Из слов</button><button class="chip${SONG.mode==="type"?" on":""}" data-md="type">⌨️ Печатать самому</button></div>
+    <div class="row"><button class="btn" id="go">Перевести →</button></div>
+    <div class="note">Переводит онлайн-переводчик, поэтому нужен интернет, а вставленный текст отправляется в этот сервис. Если вставишь песню на английском, сайт покажет русский перевод как подсказку.</div>`;
+    $("#bk").onclick=Play;
+    view.querySelectorAll("[data-md]").forEach(b=>b.onclick=()=>{SONG.mode=b.dataset.md;SFX.tap();S.songTxt=$("#st").value.slice(0,3000);setup()});
+    $("#go").onclick=async()=>{
+      const raw=$("#st").value;S.songTxt=raw.slice(0,3000);save();
+      const lines=raw.split(/\n+/).map(x=>x.trim()).filter(x=>/\p{L}/u.test(x)).slice(0,12).map(x=>x.slice(0,200));
+      if(!lines.length){toast("Вставь хотя бы одну строку песни");return}
+      const ru=/[а-яё]/i.test(raw);
+      $("#go").disabled=true;$("#go").textContent="Перевожу…";
+      const res=await Promise.all(lines.map(l=>trLine(l,ru?"ru":"en",ru?"en":"ru").catch(()=>null)));
+      if(my!==VT)return;
+      review(lines.map((l,i)=>ru?{ru:l,en:res[i]||""}:{ru:res[i]||"",en:l}),res.filter(x=>x==null).length);
+    };
+  }
+  function review(items,bad){
+    view.innerHTML=`<button class="back" id="bk">← Назад</button><h2>Перевод</h2>
+    <div class="muted">${bad?"⚠️ Не все строки удалось перевести (нет интернета или закончился лимит переводчика). Допиши их сам. ":""}Сначала прочитай и послушай английскую версию. Машинный перевод может ошибаться, поэтому поправь его, если нужно. Потом соберёшь песню сам.</div>`
+    +items.map((x,i)=>`<div class="card"><div class="muted">${esc(x.ru)}</div><div class="between"><input class="search" data-i="${i}" value="${esc(x.en)}" placeholder="English…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="icon" data-s="${i}">🔊</button></div></div>`).join("")
+    +`<div class="row"><button class="btn" id="st2">Собирать песню 🎤</button></div>`;
+    $("#bk").onclick=setup;
+    view.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const v=view.querySelector('input[data-i="'+b.dataset.s+'"]').value.trim();if(v)say(v)});
+    $("#st2").onclick=()=>{
+      const en=[...view.querySelectorAll("input[data-i]")].map(i=>i.value.trim());
+      if(en.some(x=>!/[\p{L}\p{N}]/u.test(x))){toast("Заполни английский во всех строках");return}
+      items.forEach((x,i)=>x.en=en[i]);SFX.pop();play(items);
+    };
+  }
+  function play(items){
+    const rounds=[];
+    items.forEach(x=>{
+      const tk=x.en.split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
+      const parts=tk.length>9?Math.ceil(tk.length/8):1,size=Math.ceil(tk.length/parts);
+      for(let p=0;p<parts;p++)rounds.push({ru:x.ru,tk:tk.slice(p*size,(p+1)*size),p:p+1,of:parts});
+    });
+    let r=0,score=0;
+    function round(){
+      if(r>=rounds.length)return end();
+      const q=rounds[r],ans=q.tk.map(nzT).join(" "),full=q.tk.join(" ");let failed=false,locked=false;
+      const head=`<button class="back" id="bk">← Игры</button><div class="between"><span class="muted">🎤 Песня · ${r+1}/${rounds.length}${q.of>1?" (часть "+q.p+" из "+q.of+")":""}</span></div><div class="bar"><div style="width:${r/rounds.length*100}%"></div></div>
+      <div class="card center prompt"><div class="muted">Скажи по-английски</div><div class="en2" style="font-size:22px">${esc(q.ru||"…")}</div></div>`;
+      const fail=()=>{if(!failed){failed=true;answer(false)}};
+      const win=()=>{locked=true;if(!failed){score++;answer(true)}say(full);later(()=>{r++;round()},1500)};
+      if(SONG.mode==="tiles"){
+        let L=shuffle(q.tk),sel=[];if(L.join(" ")===full&&L.length>1)L.reverse();
+        const draw=()=>{
+          view.innerHTML=head+`<div class="slots wl" id="sl">${sel.map(k=>`<button class="tile w" data-s="${k}">${esc(L[k])}</button>`).join("")||'<span class="muted">Нажимай слова по порядку</span>'}</div>
+          <div class="tiles">${L.map((x,k)=>sel.includes(k)?`<button class="tile w used" disabled>${esc(x)}</button>`:`<button class="tile w" data-k="${k}">${esc(x)}</button>`).join("")}</div>
+          <div class="row"><button class="btn ghost" id="clr">↺ Заново</button><button class="btn ghost" id="shw">💡 Показать</button></div>`;
+          $("#bk").onclick=Play;
+          view.querySelectorAll(".tiles .tile:not(.used)").forEach(t=>t.onclick=()=>{if(locked)return;sel.push(+t.dataset.k);SFX.pop();draw();if(sel.length===L.length)check()});
+          view.querySelectorAll("#sl .tile").forEach(t=>t.onclick=()=>{if(locked)return;sel=sel.filter(k=>k!==+t.dataset.s);SFX.tap();draw()});
+          $("#clr").onclick=()=>{if(!locked){sel=[];SFX.tap();draw()}};
+          $("#shw").onclick=()=>{if(locked)return;fail();const used=[];sel=q.tk.map(w=>{const k=L.findIndex((x,i)=>!used.includes(i)&&nzT(x)===nzT(w));used.push(k);return k});draw();check()};
+        };
+        const check=()=>{
+          locked=true;
+          if(sel.map(k=>nzT(L[k])).join(" ")===ans){view.querySelectorAll("#sl .tile").forEach(t=>t.style.borderColor="var(--ok)");win()}
+          else{fail();$("#sl").classList.add("shake");later(()=>{sel=[];locked=false;draw()},700)}
+        };
+        draw();
+      }else{
+        let tries=0;
+        view.innerHTML=head+`<input class="search" id="ti" placeholder="Пиши по-английски…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="note" id="fb">Регистр и знаки препинания не важны</div>
+        <div class="row"><button class="btn ghost" id="hn">💡 Подсказка</button><button class="btn" id="ck">Проверить</button></div>
+        <div class="row"><button class="btn ghost" id="sk">Не знаю</button></div>`;
+        $("#bk").onclick=Play;
+        const ti=$("#ti");
+        const reveal=()=>{locked=true;$("#fb").innerHTML="Правильно: <b>"+esc(full)+"</b>";say(full);later(()=>{r++;round()},2600)};
+        $("#hn").onclick=()=>{$("#fb").textContent="Начало: "+q.tk.slice(0,2).join(" ")+" … (слов: "+q.tk.length+")";SFX.tap()};
+        $("#sk").onclick=()=>{if(locked)return;fail();reveal()};
+        const check=()=>{
+          if(locked)return;const u=nzT(ti.value);if(!u)return;
+          if(u===ans||(ans.length>12&&lev(u,ans)<=1)){ti.disabled=true;$("#fb").innerHTML=u===ans?"✅ Верно!":"✅ Почти! Правильно так: <b>"+esc(full)+"</b>";win()}
+          else{tries++;fail();ti.classList.add("shake");setTimeout(()=>ti.classList.remove("shake"),400);if(tries>=2)reveal();else $("#fb").textContent="Не совсем. Попробуй ещё раз (поможет подсказка)"}
+        };
+        $("#ck").onclick=check;ti.onkeydown=e=>{if(e.key==="Enter")check()};
+        later(()=>{try{ti.focus()}catch(e){}},300);
+      }
+    }
+    function end(){
+      const n=rounds.length,bonus=score*3+10;gainXP(bonus);
+      if(score===n)S.flags.perfect=1;
+      S.songs=(S.songs||[]).concat([{en:items.map(x=>x.en)}]).slice(-20);
+      if(score/n>=.8){SFX.level();confetti()}
+      touchDay();save();checkAch();hud();
+      view.innerHTML=`<div class="card center hero" style="padding:24px 16px"><div class="muted">🎤 Твоя песня на английском готова!</div>
+        <div class="big">${score}/${n}</div><div class="muted">с первой попытки · бонус +${bonus} XP</div></div>
+        ${items.map((x,i)=>`<div class="card"><div class="between"><div><div class="en2" style="font-size:20px">${esc(x.en)}</div><div class="muted">${esc(x.ru)}</div></div><button class="icon" data-s="${i}">🔊</button></div></div>`).join("")}
+        <div class="row"><button class="btn" id="nw">Новая песня</button><button class="btn ghost" id="mn">Игры</button></div>`;
+      view.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>say(items[+b.dataset.s].en));
+      $("#nw").onclick=setup;$("#mn").onclick=Play;
+    }
+    round();
+  }
+  setup();
+}
+
+/* ---- sing: upload an mp3, cut 10 s, remove the voice, sing it in English ---- */
+const SING={lang:"ru",asr:null};
+function singGame(){
+  const my=VT,T=10;
+  let ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false;
+  const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const mmss=x=>Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,"0");
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const getCtx=()=>{if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==="suspended")ctx.resume();return ctx};
+  const decode=ab=>new Promise((res,rej)=>{const p=getCtx().decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej)});
+  const stopSrc=()=>{cancelAnimationFrame(raf);const a=srcs;srcs=[];a.forEach(s=>{try{s.stop()}catch(e){}})};
+  /* the app's background music must not leak into the microphone */
+  try{if(AU.ctx)AU.mus.gain.setTargetAtTime(0,AU.ctx.currentTime,.05)}catch(e){}
+  const cleanup=()=>{
+    stopSrc();
+    try{if(rec&&rec.state!=="inactive")rec.stop()}catch(e){}
+    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+    try{ctx&&ctx.close()}catch(e){}ctx=null;
+    if(recUrl){URL.revokeObjectURL(recUrl);recUrl=""}
+    try{applyVol()}catch(e){}
+  };
+  const watch=setInterval(()=>{if(my!==VT){clearInterval(watch);cleanup()}},400);
+  async function trLine(t,from,to){
+    const r=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(t)+"&langpair="+from+"|"+to);
+    const j=await r.json(),x=j&&j.responseData&&j.responseData.translatedText;
+    if(!x||+j.responseStatus!==200||/MYMEMORY WARNING|INVALID|QUERY LENGTH/i.test(x))throw new Error("tr");
+    const d=document.createElement("textarea");d.innerHTML=x;return d.value;
+  }
+  const toLines=text=>{
+    let L=text.split(/\n+/).map(x=>x.trim()).filter(x=>/\p{L}/u.test(x));
+    if(L.length===1){const w=L[0].split(/\s+/);L=[];for(let i=0;i<w.length;i+=7)L.push(w.slice(i,i+7).join(" "))}
+    return L.slice(0,8).map(x=>x.slice(0,160));
+  };
+  /* the 10-second excerpt */
+  const seg=()=>{
+    const sr=buf.sampleRate,s0=Math.floor(st*sr),n=Math.max(1,Math.min(buf.length-s0,Math.floor(T*sr))),o=getCtx().createBuffer(buf.numberOfChannels,n,sr);
+    for(let c=0;c<buf.numberOfChannels;c++)o.copyToChannel(buf.getChannelData(c).slice(s0,s0+n),c);
+    return o;
+  };
+  /* "karaoke": a voice sung in the centre of a stereo mix cancels out in L-R; the low end is kept */
+  const instr=sg=>{
+    const sr=sg.sampleRate,n=sg.length,out=getCtx().createBuffer(2,n,sr),o=out.getChannelData(0);
+    if(sg.numberOfChannels<2){o.set(sg.getChannelData(0));out.getChannelData(1).set(o);return{buf:out,ok:false}}
+    const L=sg.getChannelData(0),R=sg.getChannelData(1),a=1-Math.exp(-2*Math.PI*120/sr);let l1=0,l2=0,l3=0,l4=0,es=0,em=0,pk=0;
+    for(let i=0;i<n;i++){
+      const mid=(L[i]+R[i])*.5,side=(L[i]-R[i])*.5;l1+=a*(mid-l1);l2+=a*(l1-l2);l3+=a*(l2-l3);l4+=a*(l3-l4);
+      o[i]=side*1.4+l4*.9;es+=side*side;em+=mid*mid;
+    }
+    for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(o[i]));
+    const g=pk>0?.9/pk:1,f=Math.min(n>>1,Math.floor(sr*.03));
+    for(let i=0;i<n;i++){let k=1;if(i<f)k=i/f;else if(n-i<f)k=(n-i)/f;o[i]*=g*k}
+    out.getChannelData(1).set(o);
+    return{buf:out,ok:es>em*.0025};
+  };
+  const play=(bs,onEnd)=>{
+    stopSrc();const c=getCtx();let left=bs.length;
+    bs.forEach(([b,v])=>{const s=c.createBufferSource(),gn=c.createGain();s.buffer=b;gn.gain.value=v;s.connect(gn);gn.connect(c.destination);
+      s.onended=()=>{if(srcs.includes(s)&&--left===0){srcs=[];onEnd&&onEnd()}};srcs.push(s)});
+    const t0=c.currentTime+.05;srcs.forEach(s=>s.start(t0));return t0;
+  };
+  const clock=(t0,len)=>{
+    const c=getCtx(),pb=$("#pb"),ls=view.querySelectorAll("[data-l]"),n=ls.length;
+    const tick=()=>{
+      if(my!==VT)return;const t=Math.max(0,c.currentTime-t0),k=Math.min(n-1,Math.floor(t/len*n));
+      if(pb)pb.style.width=Math.min(100,t/len*100)+"%";
+      ls.forEach((e,i)=>{e.style.opacity=i===k?1:.35;e.style.color=i===k?"var(--g)":""});
+      if(t<len)raf=requestAnimationFrame(tick);
+    };
+    cancelAnimationFrame(raf);tick();
+  };
+
+  /* step 1: file, excerpt, lyrics */
+  function setup(){
+    view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎵 Спой на английском</h2>
+    <div class="muted">Загрузи свою песню (mp3). Сайт возьмёт отрывок в 10 секунд, уберёт из него голос, переведёт слова на английский, а ты споёшь их под мелодию. Файл остаётся на твоём устройстве.</div>
+    <div class="card center"><label class="btn ghost" for="fl" style="display:block">📂 Выбрать mp3-файл</label>
+    <input id="fl" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn">Файл не выбран</div></div>
+    <div id="after" style="display:none">
+      <div class="card"><b>Какой отрывок взять?</b><div class="muted" id="tr"></div>
+      <input type="range" id="r0" min="0" max="0" step="1" value="0" style="width:100%;accent-color:var(--a);margin:10px 0">
+      <div class="row"><button class="btn ghost" id="p1">▶ Оригинал</button><button class="btn ghost" id="p2">▶ Без голоса</button><button class="btn ghost" id="p0" style="flex:none">■</button></div>
+      <div class="note" id="pn">Без голоса работает на стерео-треках, где голос звучит по центру.</div></div>
+      <div class="muted">На каком языке песня?</div>
+      <div class="chips"><button class="chip${SING.lang==="ru"?" on":""}" data-ln="ru">🇷🇺 Русский</button><button class="chip${SING.lang==="en"?" on":""}" data-ln="en">🇬🇧 English</button></div>
+      <div class="muted" style="margin-top:8px">Слова этого отрывка</div>
+      <textarea class="search" id="ly" placeholder="Впиши, что поётся в этих 10 секундах, или нажми «Распознать»" style="min-height:110px;resize:vertical;font-family:var(--sans)"></textarea>
+      <div class="row"><button class="btn ghost" id="as">🔍 Распознать слова</button></div>
+      <div class="note" id="asn">Распознавание работает в самом браузере и при первом запуске скачивает модель (около 40 МБ). Пение оно распознаёт неточно, поэтому проверь слова.</div>
+      <div class="row"><button class="btn" id="go">Перевести →</button></div>
+      <div class="note">Перевод делает онлайн-переводчик: в него уходит только текст, звук никуда не отправляется.</div>
+    </div>`;
+    $("#bk").onclick=Play;
+    $("#fl").onchange=e=>{const f=e.target.files[0];if(f)loadFile(f)};
+    view.querySelectorAll("[data-ln]").forEach(b=>b.onclick=()=>{SING.lang=b.dataset.ln;view.querySelectorAll("[data-ln]").forEach(x=>x.classList.toggle("on",x===b));SFX.tap()});
+    $("#r0").oninput=e=>{st=+e.target.value;lab();stopSrc()};
+    $("#p0").onclick=()=>stopSrc();
+    $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
+    $("#p2").onclick=()=>{if(!buf)return;const k=instr(seg());$("#pn").textContent=k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])};
+    $("#as").onclick=autoLyrics;
+    $("#go").onclick=toTranslate;
+  }
+  const lab=()=>{$("#tr").textContent="Отрывок: "+mmss(st)+" – "+mmss(Math.min(buf.duration,st+T))+" (всего "+mmss(buf.duration)+")"};
+  async function loadFile(f){
+    if(f.size>60e6){toast("Файл больше 60 МБ, возьми поменьше");return}
+    $("#fn").textContent="Открываю «"+f.name+"»…";stopSrc();
+    try{buf=await decode(await f.arrayBuffer())}catch(e){buf=null;$("#fn").textContent="Не получилось открыть файл. Попробуй другой mp3.";return}
+    if(my!==VT)return;
+    st=0;$("#fn").textContent="✔ "+f.name;
+    $("#r0").max=Math.max(0,Math.floor(buf.duration-T));$("#r0").value=0;lab();
+    $("#after").style.display="block";SFX.ok();
+  }
+  async function autoLyrics(){
+    if(!buf||busy)return;busy=true;const note=$("#asn");$("#as").disabled=true;
+    try{
+      note.textContent="Готовлю звук…";
+      const sg=seg(),OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,oc=new OC(1,Math.ceil(sg.duration*16000),16000),s=oc.createBufferSource();
+      s.buffer=sg;s.connect(oc.destination);s.start();
+      const pcm=(await oc.startRendering()).getChannelData(0);
+      if(!SING.asr){
+        note.textContent="Скачиваю модель распознавания…";
+        const {pipeline}=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3");
+        SING.asr=await pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{progress_callback:p=>{if(my===VT&&p&&p.status==="progress"&&p.progress!=null)note.textContent="Скачиваю модель: "+Math.round(p.progress)+"%"}});
+      }
+      note.textContent="Слушаю отрывок…";
+      const out=await SING.asr(pcm,{language:SING.lang==="ru"?"russian":"english",task:"transcribe"});
+      if(my!==VT)return;
+      const tx=((out&&out.text)||"").trim();
+      if(tx){$("#ly").value=tx;note.textContent="Готово. Прочитай и поправь слова, если нужно."}else note.textContent="Слова не распознались. Впиши их вручную.";
+    }catch(e){if(my===VT)note.textContent="Автоматически распознать не вышло (нужен интернет). Впиши слова вручную."}
+    busy=false;if($("#as"))$("#as").disabled=false;
+  }
+  async function toTranslate(){
+    const raw=$("#ly").value,lines=toLines(raw);
+    if(!lines.length){toast("Впиши слова отрывка или нажми «Распознать»");return}
+    const ru=/[а-яё]/i.test(raw);
+    $("#go").disabled=true;$("#go").textContent="Перевожу…";
+    const res=await Promise.all(lines.map(l=>trLine(l,ru?"ru":"en",ru?"en":"ru").catch(()=>null)));
+    if(my!==VT)return;
+    review(lines.map((l,i)=>ru?{ru:l,en:res[i]||""}:{ru:res[i]||"",en:l}),res.filter(x=>x==null).length);
+  }
+  /* step 2: check the English text */
+  function review(list,bad){
+    view.innerHTML=`<button class="back" id="bk">← Назад</button><h2>Английский текст</h2>
+    <div class="muted">${bad?"⚠️ Не все строки перевелись (нет интернета или закончился лимит). Допиши их сам. ":""}Машинный перевод может ошибаться, поэтому поправь его. Эти слова ты будешь петь.</div>`
+    +list.map((x,i)=>`<div class="card"><div class="muted">${esc(x.ru)}</div><div class="between"><input class="search" data-i="${i}" value="${esc(x.en)}" placeholder="English…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="icon" data-s="${i}">🔊</button></div></div>`).join("")
+    +`<div class="row"><button class="btn" id="st2">К пению 🎤</button></div>`;
+    $("#bk").onclick=()=>{setup();if(buf){$("#after").style.display="block";$("#fn").textContent="✔ файл загружен";$("#r0").max=Math.max(0,Math.floor(buf.duration-T));$("#r0").value=st;lab()}};
+    view.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const v=view.querySelector('input[data-i="'+b.dataset.s+'"]').value.trim();if(v)say(v)});
+    $("#st2").onclick=()=>{
+      const en=[...view.querySelectorAll("input[data-i]")].map(i=>i.value.trim());
+      if(en.some(x=>!/[\p{L}\p{N}]/u.test(x))){toast("Заполни английский во всех строках");return}
+      items=list.map((x,i)=>({ru:x.ru,en:en[i]}));SFX.pop();sing();
+    };
+  }
+  /* step 3: sing over the instrumental */
+  function sing(){
+    const sg=seg(),k=instr(sg),len=sg.duration;ib=k.buf;
+    view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎤 Твой выход</h2>
+    <div class="tip">🎧 Надень наушники, иначе микрофон запишет мелодию из динамика. ${k.ok?"Мелодия играет без голоса.":"В этом файле голос не отделить, поэтому играет оригинал: старайся петь громче него."}</div>
+    <div class="card center">${items.map((x,i)=>`<div data-l="${i}" style="margin:10px 0;opacity:.6"><div class="en2" style="font-size:21px;margin:0">${esc(x.en)}</div><div class="muted">${esc(x.ru)}</div></div>`).join("")}
+    <div class="bar"><div id="pb" style="width:0%"></div></div><div class="en2" id="cd" style="min-height:44px"></div></div>
+    <div class="row"><button class="btn ghost" id="rh">▶ Репетиция</button><button class="btn" id="rc">🔴 Записать</button></div>
+    <div id="res"></div>`;
+    $("#bk").onclick=Play;
+    $("#rh").onclick=()=>{if(busy)return;const t0=play([[ib,1]],()=>{});clock(t0,len)};
+    $("#rc").onclick=()=>record(len);
+  }
+  async function record(len){
+    if(busy)return;
+    if(!navigator.mediaDevices||!window.MediaRecorder){toast("На этом устройстве запись голоса недоступна");return}
+    busy=true;stopSrc();
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+    catch(e){busy=false;toast("Нет доступа к микрофону. Разреши его для приложения.");return}
+    if(my!==VT)return;
+    for(const n of ["3","2","1"]){$("#cd").textContent=n;SFX.tap();await wait(800);if(my!==VT)return}
+    $("#cd").textContent="🎶 Пой!";
+    const mime=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg"].find(m=>MediaRecorder.isTypeSupported(m))||"",chunks=[];
+    rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    rec.onstop=()=>{
+      if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+      if(my!==VT)return;
+      recBlob=new Blob(chunks,{type:rec.mimeType||mime||"audio/webm"});
+      if(recUrl)URL.revokeObjectURL(recUrl);recUrl=URL.createObjectURL(recBlob);busy=false;done();
+    };
+    rec.start();
+    const t0=play([[ib,1]],()=>setTimeout(()=>{try{if(rec.state!=="inactive")rec.stop()}catch(e){}},500));clock(t0,len);
+  }
+  function done(){
+    $("#cd").textContent="✅ Записано!";
+    const first=!SING.got;SING.got=1;S.sung=(S.sung||0)+1;touchDay();gainXP(first?25:10);save();SFX.ok();confetti(60);
+    const ext=/mp4/.test(recBlob.type)?"m4a":/ogg/.test(recBlob.type)?"ogg":"webm";
+    $("#res").innerHTML=`<div class="card center"><div class="muted">Твоя запись</div><audio controls src="${recUrl}" style="width:100%;margin-top:8px"></audio>
+      <div class="row"><button class="btn gold" id="mx">🎧 Вместе с мелодией</button></div>
+      <div class="row"><button class="btn ghost" id="re">🔁 Ещё дубль</button><a class="btn ghost" href="${recUrl}" download="my-english-cover.${ext}" style="text-align:center;text-decoration:none">💾 Скачать</a></div></div>`;
+    $("#re").onclick=()=>{$("#res").innerHTML="";$("#cd").textContent="";$("#pb").style.width="0%";record(ib.duration)};
+    $("#mx").onclick=async()=>{
+      try{const rb=await decode(await recBlob.arrayBuffer());const t0=play([[ib,.7],[rb,1]]);clock(t0,ib.duration)}
+      catch(e){toast("Не получилось смешать. Послушай запись выше.")}
+    };
+  }
+  setup();
 }
 
 /* ================= LESSONS ================= */
@@ -972,7 +1446,7 @@ function Me(){
   $("#vR").oninput=e=>{S.set.rate=e.target.value/100;save()};
   $("#vR").onchange=()=>say("Hello, how are you?");
   view.querySelectorAll(".th").forEach(b=>b.onclick=()=>{S.theme=b.dataset.th;document.documentElement.dataset.theme=S.theme;save();SFX.pop();Me()});
-  $("#rst").onclick=()=>{if(confirm("Сбросить весь прогресс?")){Object.assign(S,{known:[],bests:{},lessons:{},xp:0,streak:0,lastDay:"",today:{d:todayStr(),n:0},stats:{a:0,c:0},ach:[],seen:[],fav:[],mseen:[],flags:{}});save();hud();Me()}};
+  $("#rst").onclick=()=>{if(confirm("Сбросить весь прогресс?")){Object.assign(S,{known:[],bests:{},lessons:{},xp:0,streak:0,lastDay:"",today:{d:todayStr(),n:0},stats:{a:0,c:0},ach:[],seen:[],fav:[],mseen:[],mine:[],flags:{}});save();hud();Me()}};
 }
 
 hud();render();
