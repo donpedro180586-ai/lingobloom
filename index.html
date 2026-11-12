@@ -968,6 +968,42 @@ function shopGame(){
   draw();
 }
 
+/* ---- online translation with fallbacks (shared by "Моя песня" and "Спой на английском") ---- */
+const TRC={};
+async function tfetch(url,ms){
+  const c=typeof AbortController!=="undefined"?new AbortController():null,tm=setTimeout(()=>{try{c&&c.abort()}catch(e){}},ms||9000);
+  try{const r=await fetch(url,c?{signal:c.signal}:undefined);if(!r.ok)throw new Error("http "+r.status);return await r.json()}
+  finally{clearTimeout(tm)}
+}
+const TR_PROVIDERS=[
+  async(t,f,o)=>{const j=await tfetch("https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl="+f+"&tl="+o+"&q="+encodeURIComponent(t));
+    return((j&&j[0])||[]).map(s=>(s&&s[0])||"").join("")},
+  async(t,f,o)=>{const j=await tfetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(t)+"&langpair="+f+"|"+o);
+    const x=j&&j.responseData&&j.responseData.translatedText;
+    if(!x||+j.responseStatus!==200||/MYMEMORY WARNING|INVALID|QUERY LENGTH|PLEASE SELECT/i.test(x))throw new Error("mm");
+    const d=document.createElement("textarea");d.innerHTML=x;return d.value},
+  async(t,f,o)=>{const j=await tfetch("https://lingva.ml/api/v1/"+f+"/"+o+"/"+encodeURIComponent(t));return(j&&j.translation)||""},
+  /* works only where api.anthropic.com is reachable without a key (the claude.ai preview); fails fast elsewhere */
+  async(t,f,o)=>{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:300,messages:[{role:"user",content:"Translate this song lyric line from "+(f==="ru"?"Russian":"English")+" to "+(o==="en"?"English":"Russian")+". Reply with only the translation: no quotes, no comments.\n\n"+t}]})});
+    if(!r.ok)throw new Error("api");const j=await r.json();return((j&&j.content)||[]).map(x=>x.text||"").join("").trim()}
+];
+async function trAuto(t,from,to){
+  t=String(t).trim();if(!t)throw new Error("empty");
+  const key=from+"|"+to+"|"+t;if(TRC[key])return TRC[key];
+  const cyr=s=>(s.match(/[а-яё]/gi)||[]).length,lat=s=>(s.match(/[a-z]/gi)||[]).length;
+  for(const p of TR_PROVIDERS){
+    try{
+      const x=String(await p(t,from,to)||"").trim();
+      if(!x||x.toLowerCase()===t.toLowerCase())continue;
+      if(to==="en"&&cyr(x)>lat(x))continue;
+      if(to==="ru"&&lat(x)>cyr(x))continue;
+      return TRC[key]=x;
+    }catch(e){}
+  }
+  throw new Error("tr");
+}
+
 /* ---- song: paste lyrics, translate, rebuild in English ---- */
 const SONG={mode:"tiles"};
 function songGame(){
@@ -975,12 +1011,7 @@ function songGame(){
   const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const nzT=t=>t.toLowerCase().replace(/[’`]/g,"'").replace(/[^\p{L}\p{N}'\s-]/gu,"").replace(/\s+/g," ").trim();
   const lev=(a,b)=>{const m=[];for(let i=0;i<=a.length;i++){m[i]=[i];for(let j=1;j<=b.length;j++)m[i][j]=i?0:j}for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]};
-  async function trLine(t,from,to){
-    const r=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(t)+"&langpair="+from+"|"+to);
-    const j=await r.json(),x=j&&j.responseData&&j.responseData.translatedText;
-    if(!x||+j.responseStatus!==200||/MYMEMORY WARNING|INVALID|QUERY LENGTH/i.test(x))throw new Error("tr");
-    const d=document.createElement("textarea");d.innerHTML=x;return d.value;
-  }
+  async function trLine(t,from,to){return trAuto(t,from,to)}
   function setup(){
     view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎤 Моя песня</h2>
     <div class="muted">Вставь отрывок песни (до 12 строк). Сайт переведёт его на английский, а ты соберёшь английскую версию сам.</div>
@@ -1090,7 +1121,7 @@ function songGame(){
 const SING={lang:"ru",asr:null};
 function singGame(){
   const my=VT,T=10;
-  let ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false;
+  let ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false,ic=null,mb=null;
   const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const mmss=x=>Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,"0");
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1108,37 +1139,87 @@ function singGame(){
     try{applyVol()}catch(e){}
   };
   const watch=setInterval(()=>{if(my!==VT){clearInterval(watch);cleanup()}},400);
-  async function trLine(t,from,to){
-    const r=await fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(t)+"&langpair="+from+"|"+to);
-    const j=await r.json(),x=j&&j.responseData&&j.responseData.translatedText;
-    if(!x||+j.responseStatus!==200||/MYMEMORY WARNING|INVALID|QUERY LENGTH/i.test(x))throw new Error("tr");
-    const d=document.createElement("textarea");d.innerHTML=x;return d.value;
-  }
+  async function trLine(t,from,to){return trAuto(t,from,to)}
   const toLines=text=>{
     let L=text.split(/\n+/).map(x=>x.trim()).filter(x=>/\p{L}/u.test(x));
     if(L.length===1){const w=L[0].split(/\s+/);L=[];for(let i=0;i<w.length;i+=7)L.push(w.slice(i,i+7).join(" "))}
     return L.slice(0,8).map(x=>x.slice(0,160));
   };
   /* the 10-second excerpt */
-  const seg=()=>{
-    const sr=buf.sampleRate,s0=Math.floor(st*sr),n=Math.max(1,Math.min(buf.length-s0,Math.floor(T*sr))),o=getCtx().createBuffer(buf.numberOfChannels,n,sr);
-    for(let c=0;c<buf.numberOfChannels;c++)o.copyToChannel(buf.getChannelData(c).slice(s0,s0+n),c);
+  const seg=B=>{
+    B=B||buf;
+    const sr=B.sampleRate,s0=Math.min(B.length-1,Math.floor(st*sr)),n=Math.max(1,Math.min(B.length-s0,Math.floor(T*sr))),o=getCtx().createBuffer(B.numberOfChannels,n,sr);
+    for(let c=0;c<B.numberOfChannels;c++)o.copyToChannel(B.getChannelData(c).slice(s0,s0+n),c);
     return o;
   };
-  /* "karaoke": a voice sung in the centre of a stereo mix cancels out in L-R; the low end is kept */
-  const instr=sg=>{
-    const sr=sg.sampleRate,n=sg.length,out=getCtx().createBuffer(2,n,sr),o=out.getChannelData(0);
-    if(sg.numberOfChannels<2){o.set(sg.getChannelData(0));out.getChannelData(1).set(o);return{buf:out,ok:false}}
-    const L=sg.getChannelData(0),R=sg.getChannelData(1),a=1-Math.exp(-2*Math.PI*120/sr);let l1=0,l2=0,l3=0,l4=0,es=0,em=0,pk=0;
-    for(let i=0;i<n;i++){
-      const mid=(L[i]+R[i])*.5,side=(L[i]-R[i])*.5;l1+=a*(mid-l1);l2+=a*(l1-l2);l3+=a*(l2-l3);l4+=a*(l3-l4);
-      o[i]=side*1.4+l4*.9;es+=side*side;em+=mid*mid;
+  /* "karaoke": spectral mask. Bins where L and R are identical (= a voice in the centre of the mix)
+     are removed between 150 Hz and 9 kHz; bass, kick and the very top end are kept. */
+  const FFTN=2048,HOP=512;let FT=null;
+  const fftInit=()=>{
+    if(FT)return FT;const n=FFTN,rev=new Uint16Array(n),cs=new Float64Array(n/2),sn=new Float64Array(n/2),win=new Float64Array(n),bits=Math.log2(n);
+    for(let i=0;i<n;i++){let r=0;for(let j=0;j<bits;j++)if(i&(1<<j))r|=1<<(bits-1-j);rev[i]=r}
+    for(let i=0;i<n/2;i++){cs[i]=Math.cos(2*Math.PI*i/n);sn[i]=-Math.sin(2*Math.PI*i/n)}
+    for(let i=0;i<n;i++)win[i]=.5-.5*Math.cos(2*Math.PI*i/n);
+    return FT={rev,cs,sn,win};
+  };
+  const fft=(re,im,inv)=>{
+    const {rev,cs,sn}=FT,n=FFTN;
+    for(let i=0;i<n;i++){const j=rev[i];if(j>i){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+    for(let s=2;s<=n;s<<=1){
+      const h=s>>1,stp=n/s;
+      for(let k=0;k<n;k+=s)for(let j=0;j<h;j++){
+        const wr=cs[j*stp],wi=inv?-sn[j*stp]:sn[j*stp],a=k+j,b=a+h,xr=re[b]*wr-im[b]*wi,xi=re[b]*wi+im[b]*wr;
+        re[b]=re[a]-xr;im[b]=im[a]-xi;re[a]+=xr;im[a]+=xi;
+      }
     }
-    for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(o[i]));
-    const g=pk>0?.9/pk:1,f=Math.min(n>>1,Math.floor(sr*.03));
-    for(let i=0;i<n;i++){let k=1;if(i<f)k=i/f;else if(n-i<f)k=(n-i)/f;o[i]*=g*k}
-    out.getChannelData(1).set(o);
-    return{buf:out,ok:es>em*.0025};
+    if(inv)for(let i=0;i<n;i++){re[i]/=n;im[i]/=n}
+  };
+  const instr=sg=>{
+    const sr=sg.sampleRate,n=sg.length,out=getCtx().createBuffer(2,n,sr);
+    if(sg.numberOfChannels<2){const o=out.getChannelData(0);o.set(sg.getChannelData(0));out.getChannelData(1).set(o);return{buf:out,ok:false}}
+    fftInit();
+    const N=FFTN,H=HOP,h2=N/2,win=FT.win,L=sg.getChannelData(0),R=sg.getChannelData(1);
+    const oL=new Float32Array(n),oR=new Float32Array(n),nm=new Float32Array(n);
+    const lr=new Float64Array(N),li=new Float64Array(N),rr=new Float64Array(N),ri=new Float64Array(N),g=new Float64Array(h2+1),gs=new Float64Array(h2+1);
+    const k0=Math.max(2,Math.round(150*N/sr)),k1=Math.min(h2-1,Math.round(9000*N/sr));
+    let ein=0,eout=0;
+    for(let p=-(N-H);p<n;p+=H){
+      for(let j=0;j<N;j++){const i=p+j;if(i>=0&&i<n){lr[j]=L[i]*win[j];rr[j]=R[i]*win[j]}else{lr[j]=0;rr[j]=0}li[j]=0;ri[j]=0}
+      fft(lr,li,false);fft(rr,ri,false);
+      for(let k=0;k<=h2;k++){
+        let v=1;
+        if(k>=k0&&k<=k1){
+          const a=lr[k],b=li[k],c=rr[k],d=ri[k],pw=a*a+b*b+c*c+d*d+1e-12,sim=2*(a*c+b*d)/pw;
+          let m=(sim-.55)/.4;m=m<0?0:m>1?1:m;
+          const e=Math.min(1,(k-k0+1)/8,(k1-k+1)/8);
+          v=1-(m*m*(3-2*m))*e;
+          ein+=pw;eout+=pw*v*v;
+        }
+        g[k]=v;
+      }
+      for(let k=0;k<=h2;k++)gs[k]=.25*g[k>0?k-1:0]+.5*g[k]+.25*g[k<h2?k+1:h2];
+      for(let k=0;k<=h2;k++){
+        const v=gs[k];lr[k]*=v;li[k]*=v;rr[k]*=v;ri[k]*=v;
+        if(k>0&&k<h2){lr[N-k]*=v;li[N-k]*=v;rr[N-k]*=v;ri[N-k]*=v}
+      }
+      fft(lr,li,true);fft(rr,ri,true);
+      for(let j=0;j<N;j++){const i=p+j;if(i>=0&&i<n){oL[i]+=lr[j]*win[j];oR[i]+=rr[j]*win[j];nm[i]+=win[j]*win[j]}}
+    }
+    let pk=0;
+    for(let i=0;i<n;i++){const w=nm[i]>1e-6?1/nm[i]:0;oL[i]*=w;oR[i]*=w;pk=Math.max(pk,Math.abs(oL[i]),Math.abs(oR[i]))}
+    const gn=pk>0?.9/pk:1,f=Math.min(n>>1,Math.floor(sr*.03)),cl=out.getChannelData(0),cr=out.getChannelData(1);
+    for(let i=0;i<n;i++){let k=1;if(i<f)k=i/f;else if(n-i<f)k=(n-i)/f;cl[i]=oL[i]*gn*k;cr[i]=oR[i]*gn*k}
+    const removed=ein>0?1-eout/ein:0;
+    return{buf:out,ok:removed>.04&&removed<.985};
+  };
+  const instrC=()=>{
+    if(!ic||ic.st!==st){
+      if(mb){const m=seg(mb),n=m.length,f=Math.min(n>>1,Math.floor(m.sampleRate*.03));
+        for(let c=0;c<m.numberOfChannels;c++){const d=m.getChannelData(c);for(let i=0;i<n;i++){if(i<f)d[i]*=i/f;else if(n-i<f)d[i]*=(n-i)/f}}
+        ic={st,r:{buf:m,ok:true,own:true}};
+      }else ic={st,r:instr(seg())};
+    }
+    return ic.r;
   };
   const play=(bs,onEnd)=>{
     stopSrc();const c=getCtx();let left=bs.length;
@@ -1167,23 +1248,33 @@ function singGame(){
       <div class="card"><b>Какой отрывок взять?</b><div class="muted" id="tr"></div>
       <input type="range" id="r0" min="0" max="0" step="1" value="0" style="width:100%;accent-color:var(--a);margin:10px 0">
       <div class="row"><button class="btn ghost" id="p1">▶ Оригинал</button><button class="btn ghost" id="p2">▶ Без голоса</button><button class="btn ghost" id="p0" style="flex:none">■</button></div>
-      <div class="note" id="pn">Без голоса работает на стерео-треках, где голос звучит по центру.</div></div>
+      <div class="note" id="pn">Без голоса работает на стерео-треках, где голос звучит по центру.</div>
+      <div class="note" style="margin-top:10px">Если голос всё равно слышен, возьми «минусовку» этой же песни (mp3 без голоса, её делают сайты вроде vocalremover.org или Ultimate Vocal Remover) и загрузи сюда. Она должна быть той же длины, что и оригинал.</div>
+      <label class="btn ghost" for="fl2" style="display:block;margin-top:8px">🎼 Загрузить минусовку</label><input id="fl2" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn2">${mb?"✔ минусовка загружена":"Минусовка не выбрана"}</div></div>
       <div class="muted">На каком языке песня?</div>
       <div class="chips"><button class="chip${SING.lang==="ru"?" on":""}" data-ln="ru">🇷🇺 Русский</button><button class="chip${SING.lang==="en"?" on":""}" data-ln="en">🇬🇧 English</button></div>
       <div class="muted" style="margin-top:8px">Слова этого отрывка</div>
       <textarea class="search" id="ly" placeholder="Впиши, что поётся в этих 10 секундах, или нажми «Распознать»" style="min-height:110px;resize:vertical;font-family:var(--sans)"></textarea>
       <div class="row"><button class="btn ghost" id="as">🔍 Распознать слова</button></div>
       <div class="note" id="asn">Распознавание работает в самом браузере и при первом запуске скачивает модель (около 40 МБ). Пение оно распознаёт неточно, поэтому проверь слова.</div>
-      <div class="row"><button class="btn" id="go">Перевести →</button></div>
-      <div class="note">Перевод делает онлайн-переводчик: в него уходит только текст, звук никуда не отправляется.</div>
+      <div class="row"><button class="btn" id="go">✨ Перевести →</button></div>
+      <div class="note">Если поле пустое, слова сначала распознаются сами, потом переводятся. Перевод делает онлайн-переводчик: в него уходит только текст, звук никуда не отправляется.</div>
     </div>`;
     $("#bk").onclick=Play;
     $("#fl").onchange=e=>{const f=e.target.files[0];if(f)loadFile(f)};
+    $("#fl2").onchange=async e=>{
+      const f=e.target.files[0];if(!f)return;
+      if(f.size>60e6){toast("Файл больше 60 МБ, возьми поменьше");return}
+      $("#fn2").textContent="Открываю «"+f.name+"»…";stopSrc();
+      try{mb=await decode(await f.arrayBuffer())}catch(er){mb=null;ic=null;$("#fn2").textContent="Не получилось открыть файл. Попробуй другой mp3.";return}
+      if(my!==VT)return;
+      ic=null;$("#fn2").textContent="✔ "+f.name+(buf&&Math.abs(mb.duration-buf.duration)>3?" (длина отличается от оригинала на "+Math.round(Math.abs(mb.duration-buf.duration))+" с, отрывок может не совпасть)":"");SFX.ok();
+    };
     view.querySelectorAll("[data-ln]").forEach(b=>b.onclick=()=>{SING.lang=b.dataset.ln;view.querySelectorAll("[data-ln]").forEach(x=>x.classList.toggle("on",x===b));SFX.tap()});
     $("#r0").oninput=e=>{st=+e.target.value;lab();stopSrc()};
     $("#p0").onclick=()=>stopSrc();
     $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
-    $("#p2").onclick=()=>{if(!buf)return;const k=instr(seg());$("#pn").textContent=k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])};
+    $("#p2").onclick=()=>{if(!buf)return;$("#pn").textContent="Убираю голос…";stopSrc();setTimeout(()=>{if(my!==VT||!buf)return;const k=instrC();$("#pn").textContent=k.own?"Играет твоя минусовка.":k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])},40)};
     $("#as").onclick=autoLyrics;
     $("#go").onclick=toTranslate;
   }
@@ -1193,35 +1284,59 @@ function singGame(){
     $("#fn").textContent="Открываю «"+f.name+"»…";stopSrc();
     try{buf=await decode(await f.arrayBuffer())}catch(e){buf=null;$("#fn").textContent="Не получилось открыть файл. Попробуй другой mp3.";return}
     if(my!==VT)return;
-    st=0;$("#fn").textContent="✔ "+f.name;
+    st=0;ic=null;$("#fn").textContent="✔ "+f.name;
     $("#r0").max=Math.max(0,Math.floor(buf.duration-T));$("#r0").value=0;lab();
     $("#after").style.display="block";SFX.ok();
   }
+  const tmo=(p,ms,what)=>new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error("долго нет ответа: "+what)),ms);Promise.resolve(p).then(v=>{clearTimeout(t);res(v)},e=>{clearTimeout(t);rej(e)})});
   async function autoLyrics(){
-    if(!buf||busy)return;busy=true;const note=$("#asn");$("#as").disabled=true;
+    if(!buf||busy)return"";busy=true;const note=$("#asn"),btn=$("#as");btn.disabled=true;let tx="",stage="",t0=Date.now();
+    const say2=s=>{stage=s;if(my===VT&&note)note.textContent=s+" · "+Math.round((Date.now()-t0)/1000)+" с"};
+    const tick=setInterval(()=>{if(my!==VT){clearInterval(tick);return}say2(stage)},1000);
     try{
-      note.textContent="Готовлю звук…";
+      say2("Готовлю звук");
       const sg=seg(),OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,oc=new OC(1,Math.ceil(sg.duration*16000),16000),s=oc.createBufferSource();
       s.buffer=sg;s.connect(oc.destination);s.start();
-      const pcm=(await oc.startRendering()).getChannelData(0);
+      const pcm=(await tmo(oc.startRendering(),20000,"подготовка звука")).getChannelData(0);
       if(!SING.asr){
-        note.textContent="Скачиваю модель распознавания…";
-        const {pipeline}=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3");
-        SING.asr=await pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{progress_callback:p=>{if(my===VT&&p&&p.status==="progress"&&p.progress!=null)note.textContent="Скачиваю модель: "+Math.round(p.progress)+"%"}});
+        say2("Загружаю библиотеку распознавания");
+        let tf=null,err=null;
+        for(const u of ["https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2","https://esm.run/@huggingface/transformers@3.0.2"]){
+          try{tf=await tmo(import(u),30000,"загрузка библиотеки");break}catch(e){err=e}
+        }
+        if(!tf)throw err||new Error("не загрузилась библиотека");
+        try{tf.env.allowLocalModels=false;tf.env.useBrowserCache=true}catch(e){}
+        say2("Скачиваю модель (около 40 МБ)");
+        SING.asr=await tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{device:"wasm",progress_callback:p=>{
+          if(my!==VT||!p)return;
+          if(p.status==="progress"&&p.progress!=null)say2("Скачиваю модель: "+Math.round(p.progress)+"%");
+          else if(p.status==="ready")say2("Модель готова");
+        }}),300000,"скачивание модели");
       }
-      note.textContent="Слушаю отрывок…";
-      const out=await SING.asr(pcm,{language:SING.lang==="ru"?"russian":"english",task:"transcribe"});
-      if(my!==VT)return;
-      const tx=((out&&out.text)||"").trim();
-      if(tx){$("#ly").value=tx;note.textContent="Готово. Прочитай и поправь слова, если нужно."}else note.textContent="Слова не распознались. Впиши их вручную.";
-    }catch(e){if(my===VT)note.textContent="Автоматически распознать не вышло (нужен интернет). Впиши слова вручную."}
-    busy=false;if($("#as"))$("#as").disabled=false;
+      say2("Слушаю отрывок");
+      const out=await tmo(SING.asr(pcm,{language:SING.lang==="ru"?"russian":"english",task:"transcribe"}),150000,"распознавание");
+      if(my!==VT){clearInterval(tick);return""}
+      tx=((out&&out.text)||"").trim();
+      clearInterval(tick);
+      if(tx){$("#ly").value=tx;note.textContent="Готово. Прочитай и поправь слова, если нужно."}else note.textContent="Слова не распознались. Впиши их вручную."
+    }catch(e){
+      clearInterval(tick);
+      if(my===VT){const m=String((e&&e.message)||e);note.textContent=/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(m)?"Не удалось выйти в интернет из этого окна. В предпросмотре claude.ai внешние сайты заблокированы: распознавание заработает, когда сайт открыт с твоего хостинга. А пока впиши слова вручную.":"Распознать не вышло (этап: "+stage.split(" · ")[0]+"; "+m.slice(0,100)+"). Впиши слова вручную."}
+    }
+    clearInterval(tick);busy=false;if($("#as"))$("#as").disabled=false;
+    return tx;
   }
   async function toTranslate(){
-    const raw=$("#ly").value,lines=toLines(raw);
-    if(!lines.length){toast("Впиши слова отрывка или нажми «Распознать»");return}
+    const go=$("#go");let raw=$("#ly").value;
+    go.disabled=true;
+    if(!raw.trim()&&buf){
+      go.textContent="Распознаю…";
+      raw=await autoLyrics();if(my!==VT)return;
+    }
+    const lines=toLines(raw);
+    if(!lines.length){toast("Не получилось получить слова. Впиши их вручную");go.disabled=false;go.textContent="✨ Перевести →";return}
+    go.textContent="Перевожу…";
     const ru=/[а-яё]/i.test(raw);
-    $("#go").disabled=true;$("#go").textContent="Перевожу…";
     const res=await Promise.all(lines.map(l=>trLine(l,ru?"ru":"en",ru?"en":"ru").catch(()=>null)));
     if(my!==VT)return;
     review(lines.map((l,i)=>ru?{ru:l,en:res[i]||""}:{ru:res[i]||"",en:l}),res.filter(x=>x==null).length);
@@ -1242,7 +1357,7 @@ function singGame(){
   }
   /* step 3: sing over the instrumental */
   function sing(){
-    const sg=seg(),k=instr(sg),len=sg.duration;ib=k.buf;
+    const sg=seg(),k=instrC(),len=sg.duration;ib=k.buf;
     view.innerHTML=`<button class="back" id="bk">← Игры</button><h2>🎤 Твой выход</h2>
     <div class="tip">🎧 Надень наушники, иначе микрофон запишет мелодию из динамика. ${k.ok?"Мелодия играет без голоса.":"В этом файле голос не отделить, поэтому играет оригинал: старайся петь громче него."}</div>
     <div class="card center">${items.map((x,i)=>`<div data-l="${i}" style="margin:10px 0;opacity:.6"><div class="en2" style="font-size:21px;margin:0">${esc(x.en)}</div><div class="muted">${esc(x.ru)}</div></div>`).join("")}
