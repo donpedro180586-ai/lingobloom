@@ -1174,7 +1174,7 @@ function songGame(){
 }
 
 /* ---- sing: upload an mp3, cut 10 s, remove the voice, sing it in English ---- */
-const SING={lang:"ru",asr:null};
+const SING={lang:"ru",asr:null,q:"tiny",asrQ:null};
 function singGame(){
   const my=VT,T=10;
   let mraf=0,pan=null,man=null,fname="",peaks=null,ctx=null,buf=null,st=0,srcs=[],stream=null,rec=null,recUrl="",recBlob=null,raf=0,ib=null,items=[],busy=false,ic=null,mb=null;
@@ -1363,6 +1363,8 @@ function singGame(){
       <label class="btn ghost" for="fl2" style="display:block;margin-top:8px">🎼 Загрузить минусовку</label><input id="fl2" type="file" accept="audio/*,.mp3" hidden><div class="note" id="fn2">${mb?"✔ минусовка загружена":"Минусовка не выбрана"}</div></details></div>
       <div class="muted">На каком языке песня?</div>
       <div class="chips"><button class="chip${SING.lang==="ru"?" on":""}" data-ln="ru">🇷🇺 Русский</button><button class="chip${SING.lang==="en"?" on":""}" data-ln="en">🇬🇧 English</button></div>
+      <div class="muted" style="margin-top:8px">Распознавание слов</div>
+      <div class="chips"><button class="chip${SING.q!=="base"?" on":""}" data-q="tiny">⚡ Быстро</button><button class="chip${SING.q==="base"?" on":""}" data-q="base">🎯 Точнее (скачает ещё ~80 МБ)</button></div>
       <div class="muted" style="margin-top:8px">Слова этого отрывка</div>
       <textarea class="search" id="ly" placeholder="Впиши, что поётся в этих 10 секундах, или нажми «Распознать»" style="min-height:110px;resize:vertical;font-family:var(--sans)"></textarea>
       <div class="row"><button class="btn ghost" id="as">🔍 Распознать слова</button></div>
@@ -1381,6 +1383,7 @@ function singGame(){
       ic=null;$("#fn2").textContent="✔ "+f.name+(buf&&Math.abs(mb.duration-buf.duration)>3?" (длина отличается от оригинала на "+Math.round(Math.abs(mb.duration-buf.duration))+" с, отрывок может не совпасть)":"");SFX.ok();
     };
     view.querySelectorAll("[data-ln]").forEach(b=>b.onclick=()=>{SING.lang=b.dataset.ln;view.querySelectorAll("[data-ln]").forEach(x=>x.classList.toggle("on",x===b));SFX.tap()});
+    view.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{SING.q=b.dataset.q;view.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));SFX.tap()});
     wvInit();
     $("#p0").onclick=()=>stopSrc();
     $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
@@ -1418,9 +1421,10 @@ function singGame(){
     try{
       say2("Готовлю звук");
       const sg=seg(),OC=window.OfflineAudioContext||window.webkitOfflineAudioContext,oc=new OC(1,Math.ceil(sg.duration*16000),16000),s=oc.createBufferSource();
-      s.buffer=sg;s.connect(oc.destination);s.start();
+      s.buffer=sg;const hp=oc.createBiquadFilter();hp.type="highpass";hp.frequency.value=150;const lp=oc.createBiquadFilter();lp.type="lowpass";lp.frequency.value=4500;s.connect(hp);hp.connect(lp);lp.connect(oc.destination);s.start();
       const pcm=(await tmo(oc.startRendering(),20000,"подготовка звука")).getChannelData(0);
-      if(!SING.asr){
+      {let mx=0;for(let i=0;i<pcm.length;i++)mx=Math.max(mx,Math.abs(pcm[i]));if(mx>.01&&mx<.9){const g=.9/mx;for(let i=0;i<pcm.length;i++)pcm[i]*=g}}
+      if(!SING.asr||SING.asrQ!==SING.q){SING.asr=null;
         say2("Загружаю библиотеку распознавания");
         let tf=null,err=null;
         for(const u of ["https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2","https://esm.run/@huggingface/transformers@3.0.2"]){
@@ -1429,8 +1433,8 @@ function singGame(){
         if(!tf)throw err||new Error("не загрузилась библиотека");
         try{tf.env.allowLocalModels=false;tf.env.useBrowserCache=true}catch(e){}
         try{const w=tf.env.backends.onnx.wasm;w.numThreads=1;w.proxy=false}catch(e){}
-        say2("Скачиваю модель (около 40 МБ)");const fl={};
-        const mk=()=>tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{device:"wasm",progress_callback:p=>{
+        say2("Скачиваю модель (около "+(SING.q==="base"?"80":"40")+" МБ)");const fl={};
+        const mk=()=>tmo(tf.pipeline("automatic-speech-recognition",(SING.q==="base"?"Xenova/whisper-base":"Xenova/whisper-tiny"),{device:"wasm",progress_callback:p=>{
           if(my!==VT||!p)return;
           if(p.file){
             const f=fl[p.file]||(fl[p.file]={l:0,t:0});
@@ -1442,6 +1446,7 @@ function singGame(){
           else if(Tt>0)say2("Скачиваю модель: "+Math.round(L/1e6)+" из "+Math.round(Tt/1e6)+" МБ");
         }}),300000,"скачивание модели");
         try{SING.asr=await mk()}catch(e1){say2("Первая попытка не вышла, пробую ещё раз");console.error(e1);SING.asr=await mk()}
+        SING.asrQ=SING.q;
       }
       say2("Слушаю отрывок");
       const lg={language:SING.lang==="ru"?"russian":"english",task:"transcribe"};
@@ -1450,7 +1455,7 @@ function singGame(){
       if(my!==VT){clearInterval(tick);return""}
       tx=cleanASR(((out&&out.text)||"").trim());
       clearInterval(tick);
-      if(tx){$("#ly").value=tx;note.textContent=asrCut>=6?"Распознавание зациклилось, я убрал повторы. Проверь слова: если они не похожи на песню, впиши их сам или выбери отрывок, где голос слышно лучше.":"Готово. Прочитай и поправь слова, если нужно."}else note.textContent="Слова не распознались. Впиши их вручную."
+      if(tx){$("#ly").value=tx;note.textContent=asrCut>=6?"Распознавание зациклилось, я убрал повторы. Проверь слова: если они не похожи на песню, впиши их сам или выбери отрывок, где голос слышно лучше.":(tx.split(/\s+/).length<=8?"Распозналось всего несколько слов, возможно, неточно. Проверь и впиши то, что поётся на самом деле.":"Готово. Прочитай и поправь слова, если нужно.")}else note.textContent="Слова не распознались. Впиши их вручную."
     }catch(e){
       clearInterval(tick);
       if(my===VT){console.error(e);const m=String((e&&e.message)||e),st2=stage.split(" · ")[0],net=/Failed to fetch|NetworkError|Load failed|dynamically imported/i.test(m),pv=/claude|anthropic/i.test(location.hostname);note.textContent=net?(pv?"Из предпросмотра claude.ai нельзя выйти в интернет. Открой сайт со своего хостинга. А пока впиши слова вручную.":"Ошибка сети на этапе «"+st2+"»: "+m.slice(0,80)+". Проверь, что открываются cdn.jsdelivr.net и huggingface.co (с VPN или без), и нажми ещё раз: скачанное уже сохранено в браузере. А пока можно вписать слова вручную."):"Распознать не вышло (этап: "+st2+"; "+m.slice(0,100)+"). Впиши слова вручную."}
