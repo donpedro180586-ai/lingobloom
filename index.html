@@ -1429,8 +1429,8 @@ function singGame(){
         if(!tf)throw err||new Error("не загрузилась библиотека");
         try{tf.env.allowLocalModels=false;tf.env.useBrowserCache=true}catch(e){}
         try{const w=tf.env.backends.onnx.wasm;w.numThreads=1;w.proxy=false}catch(e){}
-        say2("Скачиваю модель (около 80 МБ, один раз)");const fl={};
-        const mk=()=>tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-base",{device:"wasm",progress_callback:p=>{
+        say2("Скачиваю модель (около 40 МБ)");const fl={};
+        const mk=()=>tmo(tf.pipeline("automatic-speech-recognition","Xenova/whisper-tiny",{device:"wasm",progress_callback:p=>{
           if(my!==VT||!p)return;
           if(p.file){
             const f=fl[p.file]||(fl[p.file]={l:0,t:0});
@@ -1444,7 +1444,9 @@ function singGame(){
         try{SING.asr=await mk()}catch(e1){say2("Первая попытка не вышла, пробую ещё раз");console.error(e1);SING.asr=await mk()}
       }
       say2("Слушаю отрывок");
-      const out=await tmo(SING.asr(pcm,{language:SING.lang==="ru"?"russian":"english",task:"transcribe",repetition_penalty:1.2,no_repeat_ngram_size:4,max_new_tokens:120}),180000,"распознавание");
+      const lg={language:SING.lang==="ru"?"russian":"english",task:"transcribe"};
+      let out;try{out=await tmo(SING.asr(pcm,{...lg,repetition_penalty:1.2,no_repeat_ngram_size:4,max_new_tokens:120}),150000,"распознавание")}
+      catch(e0){console.error(e0);say2("Пробую другим способом");out=await tmo(SING.asr(pcm,lg),150000,"распознавание")}
       if(my!==VT){clearInterval(tick);return""}
       tx=cleanASR(((out&&out.text)||"").trim());
       clearInterval(tick);
