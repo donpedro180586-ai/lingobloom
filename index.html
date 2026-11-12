@@ -1366,8 +1366,11 @@ function singGame(){
       <div class="muted" style="margin-top:8px">Распознавание слов</div>
       <div class="chips"><button class="chip${SING.q!=="base"?" on":""}" data-q="tiny">⚡ Быстро</button><button class="chip${SING.q==="base"?" on":""}" data-q="base">🎯 Точнее (скачает ещё ~80 МБ)</button></div>
       <div class="muted" style="margin-top:8px">Слова этого отрывка</div>
-      <textarea class="search" id="ly" placeholder="Впиши, что поётся в этих 10 секундах, или нажми «Распознать»" style="min-height:110px;resize:vertical;font-family:var(--sans)"></textarea>
+      <textarea class="search" id="ly" placeholder="Впиши или вставь слова из этих 10 секунд. Проще всего найти текст песни кнопкой ниже и скопировать нужные строки" style="min-height:110px;resize:vertical;font-family:var(--sans)"></textarea>
       <div class="row"><button class="btn ghost" id="as">🔍 Распознать слова</button></div>
+      <div class="muted" style="margin-top:8px">Найти песню и её текст</div>
+      <div class="row" style="margin-top:6px"><input class="search" id="sq" placeholder="Название и исполнитель" style="margin:0;flex:1;min-width:0" value="${esc(SING.query||(fname||"").replace(/\.[^.]+$/,"").replace(/[_\-]+/g," ").trim())}"><button class="btn ghost" id="sb" style="flex:none">Найти</button></div>
+      <div id="sr"></div>
       <div class="note" id="asn">Распознавание работает в самом браузере и при первом запуске скачивает модель (около 40 МБ). Пение оно распознаёт неточно, поэтому проверь слова.</div>
       <div class="row"><button class="btn" id="go">✨ Перевести →</button></div>
       <div class="note">Если поле пустое, слова сначала распознаются сами, потом переводятся. Перевод делает онлайн-переводчик: в него уходит только текст, звук никуда не отправляется.</div>
@@ -1389,6 +1392,19 @@ function singGame(){
     $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
     $("#p2").onclick=()=>{if(!buf)return;$("#pn").textContent="Убираю голос…";stopSrc();setTimeout(()=>{if(my!==VT||!buf)return;const k=instrC();$("#pn").textContent=k.own?"Играет твоя минусовка.":k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])},40)};
     $("#as").onclick=autoLyrics;
+    const lyr=t=>{window.open("https://www.google.com/search?q="+encodeURIComponent(t+" текст песни"),"_blank","noopener")};
+    const doSearch=async()=>{
+      const q=$("#sq").value.trim();SING.query=q;if(!q){toast("Введи название песни");return}
+      const box=$("#sr");box.innerHTML='<div class="note">Ищу…</div>';
+      try{
+        const j=await tfetch("https://itunes.apple.com/search?media=music&entity=song&limit=6&term="+encodeURIComponent(q),9000);
+        const R=((j&&j.results)||[]).filter(x=>x.trackName);
+        box.innerHTML=R.length?R.map((x,i)=>`<div class="lcard" style="display:flex;align-items:center;gap:12px"><img src="${esc(x.artworkUrl60||"")}" width="48" height="48" style="border-radius:8px" alt=""><div style="flex:1;min-width:0"><b>${esc(x.trackName)}</b><div class="muted">${esc(x.artistName)}</div></div><button class="btn ghost" data-r="${i}" style="flex:none;padding:10px 12px">📝 Текст</button></div>`).join(""):'<div class="note">Такой песни не нашлось. Попробуй написать иначе или поищи в Google.</div>';
+        box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const x=R[+b.dataset.r];SFX.tap();lyr(x.artistName+" "+x.trackName)});
+      }catch(e){box.innerHTML='<div class="note">Поиск песен не сработал (нет интернета?). Поищи в Google.</div>'}
+      box.insertAdjacentHTML("beforeend",`<div class="row"><button class="btn ghost" id="sg">Искать «${esc(q)}» в Google</button></div>`);$("#sg").onclick=()=>lyr(q);
+    };
+    $("#sb").onclick=doSearch;$("#sq").onkeydown=e=>{if(e.key==="Enter")doSearch()};
     $("#go").onclick=toTranslate;
   }
   const lab=()=>{$("#tr").textContent="Отрывок: "+mmss(st)+" – "+mmss(Math.min(buf.duration,st+T))+" (всего "+mmss(buf.duration)+")"};
