@@ -25,11 +25,21 @@ jobs:
           code, tok = os.environ["GC_CODE"].strip(), os.environ["GC_TOKEN"].strip()
           tg, chat = os.environ["TG_TOKEN"].strip(), os.environ["TG_CHAT"].strip()
 
-          def gc(path, **q):
-              url = f"https://{code}.goatcounter.com/api/v0/{path}?" + urllib.parse.urlencode(q)
-              req = urllib.request.Request(url, headers={"Authorization": "Bearer " + tok})
-              with urllib.request.urlopen(req, timeout=30) as r:
-                  data = json.load(r)
+          class GCError(Exception):
+              pass
+
+          def gc(path, soft=False, **q):
+              url = f"https://{code}.goatcounter.com/api/v0/{path}"
+              if q:
+                  url += "?" + urllib.parse.urlencode(q)
+              headers = {"Authorization": "Bearer " + tok, "Content-Type": "application/json", "Accept": "application/json"}
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as r:
+                      data = json.load(r)
+              except urllib.error.HTTPError as e:
+                  if soft and e.code == 404:
+                      return {}
+                  raise GCError(f"{path} -> {e.code} {e.read().decode('utf-8', 'replace')[:150]}")
               time.sleep(0.6)
               return data
 
@@ -47,18 +57,19 @@ jobs:
           events = [("tg-open", "✈️ Открыли в Telegram"), ("lesson-done", "📘 Уроков пройдено"), ("game-played", "🎮 Игр сыграно")]
 
           try:
+              gc("me")
               out = ["📊 English: статистика"]
               for title, start in periods:
                   a = dict(start=iso(start), end=iso(now))
-                  total = gc("stats/total", **a).get("total", 0)
-                  hits = gc("stats/hits", limit=100, daily="false", **a).get("hits", [])
+                  total = gc("stats/total", soft=True, **a).get("total", 0)
+                  hits = gc("stats/hits", soft=True, limit=100, **a).get("hits", [])
                   ev = {str(h.get("path", "")).lstrip("/"): h.get("count", 0) for h in hits if h.get("event")}
                   out.append("")
                   out.append(title)
                   out.append(f"👥 Визиты: {total}")
                   out += [f"{label}: {ev.get(key, 0)}" for key, label in events]
               send("\n".join(out))
-          except urllib.error.HTTPError as e:
-              send(f"⚠️ Не вышло получить статистику (ошибка {e.code}). Проверь GOATCOUNTER_CODE и токен.")
+          except GCError as e:
+              send(f"⚠️ GoatCounter не ответил как нужно: {e}. Проверь секреты GOATCOUNTER_CODE и GOATCOUNTER_TOKEN.")
               raise
           PY
