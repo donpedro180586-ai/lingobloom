@@ -1371,6 +1371,9 @@ function singGame(){
       <div class="muted" style="margin-top:8px">Найти песню и её текст</div>
       <div class="row" style="margin-top:6px"><input class="search" id="sq" placeholder="Название и исполнитель" style="margin:0;flex:1;min-width:0" value="${esc(SING.query||(fname||"").replace(/\.[^.]+$/,"").replace(/[_\-]+/g," ").trim())}"><button class="btn ghost" id="sb" style="flex:none">Найти</button></div>
       <div id="sr"></div>
+      <div class="row"><button class="btn" id="al">⚡ Взять слова автоматически</button></div>
+      <div class="note">Найдёт синхронизированный текст (по времени) и возьмёт строки ровно из выбранных секунд. Это точнее, чем распознавание на слух. Работает для известных песен.</div>
+      <div id="lrcbox"></div>
       <div class="note" id="asn">Распознавание работает в самом браузере и при первом запуске скачивает модель (один раз, потом она хранится в браузере). Сначала из отрывка выделяется голос, потом он распознаётся. Пение всё равно можно расслышать неточно, поэтому проверь слова.</div>
       <div class="row"><button class="btn" id="go">✨ Перевести →</button></div>
       <div class="note">Если поле пустое, слова сначала распознаются сами, потом переводятся. Перевод делает онлайн-переводчик: в него уходит только текст, звук никуда не отправляется.</div>
@@ -1392,6 +1395,8 @@ function singGame(){
     $("#p1").onclick=()=>{if(!buf)return;play([[seg(),1]])};
     $("#p2").onclick=()=>{if(!buf)return;$("#pn").textContent="Убираю голос…";stopSrc();setTimeout(()=>{if(my!==VT||!buf)return;const k=instrC();$("#pn").textContent=k.own?"Играет твоя минусовка.":k.ok?"Играет мелодия без голоса.":"В этом файле голос не отделить (он моно или звучит не по центру). Играет оригинал.";play([[k.ok?k.buf:seg(),1]])},40)};
     $("#as").onclick=autoLyrics;
+    $("#al").onclick=autoLrc;
+    if(lrc)showLrc();
     const lyr=t=>{window.open("https://www.google.com/search?q="+encodeURIComponent(t+" текст песни"),"_blank","noopener")};
     const doSearch=async()=>{
       const q=$("#sq").value.trim();SING.query=q;if(!q){toast("Введи название песни");return}
@@ -1407,7 +1412,7 @@ function singGame(){
     $("#sb").onclick=doSearch;$("#sq").onkeydown=e=>{if(e.key==="Enter")doSearch()};
     $("#go").onclick=toTranslate;
   }
-  const lab=()=>{$("#tr").textContent="Отрывок: "+mmss(st)+" – "+mmss(Math.min(buf.duration,st+T))+" (всего "+mmss(buf.duration)+")"};
+  const lab=()=>{if(lrc)fillLrc();$("#tr").textContent="Отрывок: "+mmss(st)+" – "+mmss(Math.min(buf.duration,st+T))+" (всего "+mmss(buf.duration)+")"};
   async function loadFile(f){
     if(f.size>60e6){toast("Файл больше 60 МБ, возьми поменьше");return}
     fcard("Открываю «"+esc(f.name)+"»…<small>подожди несколько секунд</small>",false);stopSrc();
@@ -1587,6 +1592,68 @@ function singGame(){
     }
     clearInterval(tick);busy=false;if($("#as"))$("#as").disabled=false;
     return tx;
+  }
+  /* ---- exact words from a time-synced lyrics database (lrclib.net): lines that fall inside the chosen seconds ---- */
+  let lrc=null,lrcOff=0,lrcC=[],lrcI=0;
+  const parseLrc=t=>{
+    const o=[];
+    for(const ln of String(t||"").split(/\r?\n/)){
+      const m=ln.match(/^\s*((?:\[\d+:\d+(?:[.:]\d+)?\])+)\s*(.*)$/);if(!m)continue;
+      const x=m[2].trim();
+      for(const g of m[1].matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g))o.push({t:+g[1]*60+parseFloat(g[2].replace(":",".")),x});
+    }
+    return o.sort((a,b)=>a.t-b.t);
+  };
+  /* lines that overlap [w0, w0+T] by at least ~1.2 s (or by most of their length) */
+  const lrcLines=(L,w0)=>{
+    const w1=w0+T,out=[];
+    for(let i=0;i<L.length;i++){
+      const a=L[i].t,b=i+1<L.length?Math.min(L[i+1].t,a+8):a+4;
+      if(!L[i].x||!/\p{L}/u.test(L[i].x))continue;
+      const ov=Math.min(b,w1)-Math.max(a,w0);
+      if(ov>=1.2||(ov>0&&ov>=.6*(b-a)))out.push(L[i].x);
+    }
+    return out.slice(0,8);
+  };
+  function fillLrc(){
+    if(!lrc)return;
+    const ls=lrcLines(lrc,st+lrcOff),ly=$("#ly");
+    if(ly)ly.value=ls.join("\n");
+    const o=$("#lrco");if(o)o.textContent=(lrcOff>0?"+":"")+lrcOff.toFixed(1)+" с";
+    const n=$("#lrcn");if(n)n.textContent=ls.length?"Взято строк: "+ls.length+". Нажми «Слушать» и проверь, что слова совпадают с песней. Если сдвинуто, подвинь кнопками.":"В эти секунды слов нет (там музыка или пауза). Подвинь кнопками или выбери другой отрывок.";
+  }
+  function showLrc(){
+    const b=$("#lrcbox");if(!b||!lrc)return;
+    const c=lrcC[lrcI];
+    b.innerHTML=`<div class="card" style="margin-top:10px"><b class="sg-h">Текст найден: ${esc(c.artistName||"")} — ${esc(c.trackName||"")}</b>
+    <div class="muted">Версия на ${mmss(c.duration||0)}, твой файл ${mmss(buf.duration)}${Math.abs((c.duration||0)-buf.duration)>6?". Длина отличается, слова могут быть сдвинуты: подвинь их кнопками":""}.</div>
+    <div class="row" style="margin-top:8px;align-items:center"><button class="btn ghost" data-sh="-2" style="flex:none;padding:10px 12px">−2 с</button><button class="btn ghost" data-sh="-.5" style="flex:none;padding:10px 12px">−0.5</button><div class="center" style="flex:1"><b id="lrco">0 с</b><div class="muted" style="font-size:12px">сдвиг слов</div></div><button class="btn ghost" data-sh=".5" style="flex:none;padding:10px 12px">+0.5</button><button class="btn ghost" data-sh="2" style="flex:none;padding:10px 12px">+2 с</button></div>
+    <div class="note" id="lrcn"></div>
+    <div class="row"><button class="btn ghost" id="lrcp">▶ Слушать отрывок</button></div>
+    ${lrcC.length>1?`<div class="muted" style="margin-top:8px">Другие версии</div><div class="chips">${lrcC.map((x,i)=>`<button class="chip${i===lrcI?" on":""}" data-lc="${i}">${esc((x.artistName||"")+" — "+(x.trackName||""))} · ${mmss(x.duration||0)}</button>`).join("")}</div>`:""}</div>`;
+    b.querySelectorAll("[data-sh]").forEach(x=>x.onclick=()=>{lrcOff=Math.round((lrcOff+parseFloat(x.dataset.sh))*10)/10;SFX.tap();fillLrc()});
+    b.querySelectorAll("[data-lc]").forEach(x=>x.onclick=()=>{lrcI=+x.dataset.lc;lrc=parseLrc(lrcC[lrcI].syncedLyrics);lrcOff=0;SFX.tap();showLrc()});
+    $("#lrcp").onclick=()=>{if(buf)play([[seg(),1]])};
+    fillLrc();
+  }
+  async function autoLrc(){
+    if(!buf){toast("Сначала выбери файл");return}
+    const q=($("#sq").value||(fname||"").replace(/\.[^.]+$/,"").replace(/[_\-]+/g," ")).trim();SING.query=q;
+    if(!q){toast("Введи название песни и исполнителя");return}
+    const btn=$("#al"),box=$("#lrcbox");btn.disabled=true;box.innerHTML='<div class="note">Ищу текст…</div>';
+    try{
+      let R=await tfetch("https://lrclib.net/api/search?q="+encodeURIComponent(q),12000);
+      R=(Array.isArray(R)?R:[]).filter(x=>x&&x.syncedLyrics&&!x.instrumental);
+      if(!R.length){box.innerHTML='<div class="note">Текст с таймингами для этой песни не нашёлся. Попробуй «Артист Название» или распознавание на слух.</div>';return}
+      /* the version whose length is closest to the user's file is the most likely to line up */
+      R.sort((a,b)=>Math.abs((a.duration||0)-buf.duration)-Math.abs((b.duration||0)-buf.duration));
+      lrcC=R.slice(0,5);lrcI=0;lrc=parseLrc(lrcC[0].syncedLyrics);lrcOff=0;
+      if(!lrc.length){box.innerHTML='<div class="note">Текст пришёл без таймингов. Попробуй распознавание на слух.</div>';lrc=null;return}
+      SFX.ok();showLrc();
+    }catch(e){
+      console.error(e);const pv=/claude|anthropic/i.test(location.hostname);
+      box.innerHTML='<div class="note">'+(pv?"Из предпросмотра claude.ai нельзя выйти в интернет. Открой сайт со своего хостинга.":"Не получилось связаться с базой текстов (нет интернета?). Попробуй ещё раз или используй распознавание на слух.")+'</div>';
+    }finally{btn.disabled=false}
   }
   async function toTranslate(){
     const go=$("#go");let raw=$("#ly").value;
