@@ -7,7 +7,7 @@ Usage:
     python scripts/generate_audio.py --list   # only print the texts (no network)
 
 Engines, in order of preference:
-  1. ElevenLabs  - used when the ELEVENLABS_API_KEY secret/env var is set (voice Roger by default)
+  1. ElevenLabs  - used when the ELEVENLABS_API_KEY secret/env var is set (voice Bella by default)
   2. edge-tts    - Microsoft neural voices (TTS_VOICE / TTS_RATE)
   3. gTTS        - Google, last resort
 
@@ -36,10 +36,10 @@ DEFAULT_RATE = "-10%"                # slower = easier for learners
 FORCE = "--force" in sys.argv or os.environ.get("FORCE", "").lower() == "true"
 
 EL_KEY = (os.environ.get("ELEVENLABS_API_KEY") or "").strip()
-EL_VOICE = (os.environ.get("ELEVENLABS_VOICE_ID") or "").strip() or "CwhRBWXzGAHq8TQ4Fs17"  # Roger
-EL_MODEL = (os.environ.get("ELEVENLABS_MODEL") or "").strip() or "eleven_multilingual_v2"
+EL_VOICE = (os.environ.get("ELEVENLABS_VOICE_ID") or "").strip() or "hpp4J3VqNfWAUOO0d1Us"  # Bella
+EL_MODEL = (os.environ.get("ELEVENLABS_MODEL") or "").strip() or "eleven_flash_v2_5"   # half the credits of multilingual_v2
 EL_BASE = (os.environ.get("ELEVENLABS_BASE_URL") or "").strip() or "https://api.elevenlabs.io"
-EL_STABILITY, EL_SIMILARITY = 0.5, 0.75   # same as the sample: s50 / sim75
+EL_STABILITY, EL_SIMILARITY, EL_SPEED = 0.5, 0.8, 0.95   # same settings as the Worker (/tts)
 
 
 def h32(s: str) -> str:
@@ -99,7 +99,7 @@ def make_eleven(text, path) -> bool:
     body = json.dumps({
         "text": text,
         "model_id": EL_MODEL,
-        "voice_settings": {"stability": EL_STABILITY, "similarity_boost": EL_SIMILARITY},
+        "voice_settings": {"stability": EL_STABILITY, "similarity_boost": EL_SIMILARITY, "speed": EL_SPEED},
     }).encode()
     req = urllib.request.Request(
         url, data=body, method="POST",
@@ -200,7 +200,7 @@ async def main() -> int:
     mv = (meta or {}).get("voice") or ""
     voice = os.environ.get("TTS_VOICE") or (mv if mv and not mv.startswith("elevenlabs:") else "") or DEFAULT_VOICE
     rate = os.environ.get("TTS_RATE") or (meta or {}).get("rate") or DEFAULT_RATE
-    label = f"elevenlabs:{EL_VOICE}" if EL_KEY else voice
+    label = f"elevenlabs:{EL_VOICE}:{EL_MODEL}" if EL_KEY else voice
     if FORCE or not meta or meta.get("voice") != label or meta.get("rate") != rate:
         meta = {"voice": label, "rate": rate, "done": []}
         print(f"Re-creating all files: engine={label} rate={rate}", flush=True)
