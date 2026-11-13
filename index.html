@@ -434,7 +434,12 @@ $("#mm").onclick=e=>{if(e.target.id==="mm")closeMeme()};
 function touchDay(){
   const t=todayStr();
   if(S.today.d!==t)S.today={d:t,n:0};
-  if(S.lastDay!==t){S.streak=(S.lastDay===yestStr())?S.streak+1:1;S.lastDay=t;}
+  if(S.lastDay!==t){
+    const gap=S.lastDay?Math.round((new Date(t)-new Date(S.lastDay))/864e5):99;
+    if(gap===1)S.streak++;
+    else if(gap===2&&S.prem&&freezeReady()){S.streak++;S.frz=t;setTimeout(()=>{try{toast("🧊 Заморозка спасла твою серию!")}catch(e){}},700)}
+    else S.streak=1;
+    S.lastDay=t;}
 }
 
 /* ================= AUDIO: music & effects ================= */
@@ -635,8 +640,8 @@ function hud(){
   $("#hLv").textContent="Ур. "+level()+" · "+S.xp+" XP";memeDot();
 }
 function gainXP(n){
-  const old=level();S.xp+=n;S.coins=(S.coins||0)+Math.max(1,Math.round(n/2));
-  if(level()>old){S.coins+=50;SFX.level();confetti(140);toast("🎉 Новый уровень: "+level()+"!")}
+  const old=level();S.xp+=n;S.coins=(S.coins||0)+Math.max(1,Math.round(n/2))*cm();
+  if(level()>old){S.coins+=50*cm();SFX.level();confetti(140);toast("🎉 Новый уровень: "+level()+"!")}
   save();hud();
 }
 const LESSONS=D.lessons;
@@ -2060,8 +2065,8 @@ function questCard(){
 function bindQuests(){
   view.querySelectorAll("[data-qc]").forEach(b=>b.onclick=()=>{
     const id=b.dataset.qc,d=dq();if(d.claimed.includes(id))return;
-    if(id==="chest"){if(QUESTS.some(q=>d[q.k]<q.need))return;d.claimed.push(id);S.flags.chest=1;S.coins=(S.coins||0)+100;gainXP(50);SFX.level();confetti(120);toast("🎁 Сундук открыт: +100 🪙 и +50 XP")}
-    else{const q=QUESTS.find(x=>x.id===id);if(!q||d[q.k]<q.need)return;d.claimed.push(id);S.coins=(S.coins||0)+q.coins;gainXP(10);SFX.coin();toast("+"+q.coins+" 🪙")}
+    if(id==="chest"){if(QUESTS.some(q=>d[q.k]<q.need))return;d.claimed.push(id);S.flags.chest=1;S.coins=(S.coins||0)+100*cm();gainXP(50);SFX.level();confetti(120);toast("🎁 Сундук открыт: +"+100*cm()+" 🪙 и +50 XP")}
+    else{const q=QUESTS.find(x=>x.id===id);if(!q||d[q.k]<q.need)return;d.claimed.push(id);S.coins=(S.coins||0)+q.coins*cm();gainXP(10);SFX.coin();toast("+"+q.coins*cm()+" 🪙")}
     save();checkAch();if(tab==="home")Home();
   });
 }
@@ -2172,10 +2177,10 @@ function avatarHTML(sz,frame){
 const CUSTOM_PRICE=1000;
 function customTile(){
   const P=S.prof,own=S.own.custom,eq=P.banner==="bc"&&P.custom;
-  return `<button class="si${eq?" on":""}" data-it="bc"><div class="pv" style="${P.custom?`background:url('${P.custom}') center/cover no-repeat`:"border:1px dashed var(--line2);font-size:24px;color:var(--muted)"}">${P.custom?"":"＋"}</div><b>Свой баннер</b><span>${!own?"🪙 "+CUSTOM_PRICE+" · своя картинка":!P.custom?"Загрузить картинку":eq?"✓ Надето · сменить":"Куплено · надеть"}</span></button>`}
+  return `<button class="si${eq?" on":""}" data-it="bc"><div class="pv" style="${P.custom?`background:url('${P.custom}') center/cover no-repeat`:"border:1px dashed var(--line2);font-size:24px;color:var(--muted)"}">${P.custom?"":"＋"}</div><b>Свой баннер</b><span>${!own?"🪙 "+pp(CUSTOM_PRICE)+" · своя картинка":!P.custom?"Загрузить картинку":eq?"✓ Надето · сменить":"Куплено · надеть"}</span></button>`}
 function customFrameTile(){
   const P=S.prof,own=S.own.cframe,eq=P.frame==="fc"&&P.cframe;
-  return `<button class="si${eq?" on":""}" data-it="fc"><div class="pv">${P.cframe?avatarHTML(34,"fc"):'<span style="font-size:24px;color:var(--muted)">＋</span>'}</div><b>Своя рамка</b><span>${!own?"🪙 "+CUSTOM_PRICE+" · своя картинка":!P.cframe?"Загрузить картинку":eq?"✓ Надето · сменить":"Куплено · надеть"}</span></button>`;
+  return `<button class="si${eq?" on":""}" data-it="fc"><div class="pv">${P.cframe?avatarHTML(34,"fc"):'<span style="font-size:24px;color:var(--muted)">＋</span>'}</div><b>Своя рамка</b><span>${!own?"🪙 "+pp(CUSTOM_PRICE)+" · своя картинка":!P.cframe?"Загрузить картинку":eq?"✓ Надето · сменить":"Куплено · надеть"}</span></button>`;
 }
 function pickFrame(){const f=document.querySelector("#ff");if(f){f.value="";f.click()}}
 /* any picture -> frame: if it has transparency it is kept as it is; otherwise the background (light or dark) is cut out and the art is tinted with the theme colour */
@@ -2206,19 +2211,20 @@ function frameFromImage(im){
 }
 function pickBanner(){const f=document.querySelector("#bf");if(f){f.value="";f.click()}}
 function buy(id){
+  const CP=pp(CUSTOM_PRICE);
   if(id==="fc"){
     if(!S.own.cframe){
-      if(S.coins<CUSTOM_PRICE){toast("Не хватает монет: нужно 🪙 "+CUSTOM_PRICE);return}
-      S.coins-=CUSTOM_PRICE;S.own.cframe=true;save();SFX.ok();confetti(60);toast("Куплено! Выбери свою картинку");Me();pickFrame();return}
+      if(S.coins<CP){toast("Не хватает монет: нужно 🪙 "+CP);return}
+      S.coins-=CP;S.own.cframe=true;save();SFX.ok();confetti(60);toast("Куплено! Выбери свою картинку");Me();pickFrame();return}
     if(!S.prof.cframe||S.prof.frame==="fc"){pickFrame();return}
     S.prof.frame="fc";save();SFX.pop();Me();return}
   if(id==="bc"){
     if(!S.own.custom){
-      if(S.coins<CUSTOM_PRICE){toast("Не хватает монет: нужно 🪙 "+CUSTOM_PRICE);return}
-      S.coins-=CUSTOM_PRICE;S.own.custom=true;save();SFX.ok();confetti(60);toast("Куплено! Выбери свою картинку");Me();pickBanner();return}
+      if(S.coins<CP){toast("Не хватает монет: нужно 🪙 "+CP);return}
+      S.coins-=CP;S.own.custom=true;save();SFX.ok();confetti(60);toast("Куплено! Выбери свою картинку");Me();pickBanner();return}
     if(!S.prof.custom||S.prof.banner==="bc"){pickBanner();return}
     S.prof.banner="bc";save();SFX.pop();Me();return}
-  const isB=id[0]==="b",it=(isB?BANNERS:FRAMES).find(x=>x[0]===id),k=isB?"banner":"frame",own=isB?S.own.banners:S.own.frames,price=isB?it[3]:it[2];
+  const isB=id[0]==="b",it=(isB?BANNERS:FRAMES).find(x=>x[0]===id),k=isB?"banner":"frame",own=isB?S.own.banners:S.own.frames,price=pp(isB?it[3]:it[2]);
   if(own.includes(id)){S.prof[k]=id;save();SFX.pop();Me();return}
   if(S.coins<price){toast("Не хватает монет: нужно 🪙 "+price);return}
   S.coins-=price;own.push(id);S.prof[k]=id;save();SFX.ok();confetti(60);toast("Куплено: "+it[1]);Me();
@@ -2230,7 +2236,8 @@ function Me(){
     ${avatarHTML(88)}
     <div class="pinfo"><div class="pname">${esc(P.name||"Ученик")}</div>
       <div class="muted" style="color:rgba(255,255,255,.8)">Уровень ${level()} · ${S.xp} XP</div>
-      <div class="pchips"><span class="pill">🪙 ${S.coins}</span><span class="pill">🔥 ${S.streak}</span></div></div></div>
+      <div class="pchips"><span class="pill">🪙 ${S.coins}</span><span class="pill">🔥 ${S.streak}</span>${S.prem?'<span class="pill">👑 Premium</span>':""}</div></div></div>
+  ${premCard()}
   <details class="card pedit"${meOpen?" open":""}><summary class="muted" style="cursor:pointer">✏️ Изменить имя и аватарку</summary>
     <input class="search" id="pn" maxlength="16" placeholder="Твоё имя" value="${esc(P.name)}" style="margin-top:12px">
     <div class="avpick">${AVS.map(e=>`<button class="avb${!P.photo&&P.av===e?" on":""}" data-av="${e}">${e}</button>`).join("")}</div>
@@ -2248,7 +2255,7 @@ function Me(){
   <div style="margin-top:12px"></div>
   <div class="muted">Монеты (🪙 ${S.coins}) даются за ответы и новые уровни. Нажми на предмет, чтобы купить или надеть.</div>
   <div class="chips"><button class="chip${isB?" on":""}" data-sh="b">🖼 Баннеры</button><button class="chip${isB?"":" on"}" data-sh="f">⭕ Рамки</button></div>
-  <div class="shopg">${isB?customTile():customFrameTile()}${(isB?BANNERS:FRAMES).map(it=>{const id=it[0],price=isB?it[3]:it[2],has=own.includes(id),eq=(isB?P.banner:P.frame)===id;
+  <div class="shopg">${isB?customTile():customFrameTile()}${(isB?BANNERS:FRAMES).map(it=>{const id=it[0],price=pp(isB?it[3]:it[2]),has=own.includes(id),eq=(isB?P.banner:P.frame)===id;
     return `<button class="si${eq?" on":""}" data-it="${id}"><div class="pv"${isB?` style="background:${it[2]}"`:""}>${isB?"":avatarHTML(IMGF[id]?34:46,id)}</div><b>${it[1]}</b><span>${eq?"✓ Надето":has?"Куплено · надеть":"🪙 "+price}</span></button>`}).join("")}</div>
   ${isB?"":`<div class="note" style="text-align:left">${Object.values(FRNOTE).join(" · ")}. Своя рамка: черно-белый рисунок на белом фоне или PNG с прозрачным фоном.</div>`}</details>
   <input id="bf" type="file" accept="image/*" hidden><input id="ff" type="file" accept="image/*" hidden>
@@ -2272,6 +2279,7 @@ function Me(){
   <div class="row"><button class="btn ghost" id="rst">Сбросить прогресс</button></div>`;
   view.querySelector(".pedit").ontoggle=e=>{meOpen=e.target.open};
   $("#shopd").ontoggle=e=>{shopOpen=e.target.open};
+  bindPrem();
   $("#pn").oninput=e=>{S.prof.name=e.target.value.trim().slice(0,16);save();view.querySelector(".pname").textContent=S.prof.name||"Ученик"};
   view.querySelectorAll("[data-av]").forEach(b=>b.onclick=()=>{S.prof.av=b.dataset.av;S.prof.photo="";save();SFX.pop();Me()});
   $("#ph").onclick=()=>$("#phf").click();
@@ -2313,7 +2321,58 @@ function Me(){
   $("#rst").onclick=()=>{if(confirm("Сбросить весь прогресс?")){Object.assign(S,{known:[],bests:{},lessons:{},xp:0,streak:0,lastDay:"",today:{d:todayStr(),n:0},stats:{a:0,c:0},ach:[],seen:[],fav:[],mseen:[],mine:[],flags:{}});save();hud();Me()}};
 }
 
-hud();render();
+
+/* ---- Premium: Telegram Stars, checked by the Cloudflare Worker ---- */
+const PREM_URL="https://quiet-frog-ca80lingobloom-premium.donpedro180586.workers.dev",PREM_PRICE=100;
+function cm(){return S.prem?2:1}
+function pp(p){return S.prem?Math.round(p*.8):p}
+function premInit(){try{return(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)||""}catch(e){return""}}
+function freezeReady(){return !S.frz||Math.round((new Date(todayStr())-new Date(S.frz))/864e5)>=7}
+async function premCall(path){
+  const c=typeof AbortController!=="undefined"?new AbortController():null,tm=setTimeout(()=>{try{c&&c.abort()}catch(e){}},12000);
+  try{const r=await fetch(PREM_URL+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:premInit()}),signal:c?c.signal:undefined});return await r.json()}
+  finally{clearTimeout(tm)}
+}
+async function premCheck(){
+  if(!premInit())return;
+  try{const j=await premCall("/status");
+    if(j&&typeof j.premium==="boolean"&&j.premium!==!!S.prem){S.prem=j.premium;save();hud();if(tab==="me")Me()}}
+  catch(e){}
+}
+async function premBuy(){
+  if(!premInit()){toast("Premium покупается внутри Telegram");return}
+  const T=Telegram.WebApp;
+  try{
+    const j=await premCall("/invoice");
+    if(!j||!j.link){toast("Не получилось создать счёт. Попробуй позже");return}
+    T.openInvoice(j.link,async st=>{
+      if(st!=="paid"){if(st==="failed")toast("Оплата не прошла");return}
+      toast("Проверяю оплату…");
+      for(let i=0;i<8&&!S.prem;i++){await premCheck();if(S.prem)break;await new Promise(r=>setTimeout(r,1500))}
+      if(S.prem){SFX.level();confetti(160);toast("👑 Premium активирован!");if(tab==="me")Me()}
+      else toast("Платёж принят. Premium включится через минуту: зайди в Профиль ещё раз")
+    });
+  }catch(e){toast("Нет связи с сервером оплаты")}
+}
+function premDaily(){
+  const t=todayStr();if(!S.prem||S.pdb===t)return;
+  S.pdb=t;S.coins=(S.coins||0)+50;save();hud();SFX.coin();toast("🎁 Бонус дня: +50 🪙");Me()
+}
+function premCard(){
+  const perks='🪙 Монеты ×2 за всё<br>🎁 Бонус +50 🪙 каждый день<br>🧊 Заморозка серии: сохраняет серию, если пропустишь 1 день (раз в неделю)<br>🛍 −20% в магазине';
+  if(S.prem){
+    const dl=S.pdb!==todayStr();
+    return `<div class="card" style="border-color:rgba(200,169,106,.55)"><div class="between"><b>👑 Premium активен</b><span class="muted">спасибо!</span></div>
+    <div class="muted" style="margin:10px 0;line-height:1.7">${perks}<br>Заморозка сейчас: ${freezeReady()?"готова":"восстановится в течение недели"}</div>
+    <button class="btn gold" id="pdb" style="width:100%"${dl?"":" disabled"}>${dl?"🎁 Забрать бонус дня: +50 🪙":"✔ Бонус на сегодня получен"}</button></div>`}
+  return `<div class="card" style="border-color:rgba(200,169,106,.55)"><b>👑 Premium</b>
+    <div class="muted" style="margin:10px 0;line-height:1.7">${perks}</div>
+    <button class="btn gold" id="pbuy" style="width:100%">Купить за ⭐ ${PREM_PRICE}</button>
+    ${premInit()?"":'<div class="note">Покупка доступна, когда сайт открыт внутри Telegram.</div>'}</div>`
+}
+function bindPrem(){const b=$("#pbuy");if(b)b.onclick=()=>{SFX.pop();premBuy()};const d=$("#pdb");if(d)d.onclick=premDaily}
+
+hud();render();premCheck();
 new MutationObserver(()=>{view.classList.remove("pgin");void view.offsetWidth;view.classList.add("pgin")}).observe(view,{childList:true});
 {let n=0,t0=0;document.querySelector(".logo").addEventListener("click",()=>{const now=Date.now();n=now-t0>3000?1:n+1;t0=now;if(n>=7){n=0;tab="admin";redraw=null;SFX.pop();render()}})}
 </script>
