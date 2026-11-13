@@ -590,10 +590,11 @@ function cloudSay(text,slow,i){
 }
 /* Pre-recorded files: audio/<hash>.mp3 (made by scripts/generate_audio.py) */
 function h32(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,"0")}
+const AUDIO_API=""; /* адрес твоего Worker, например https://имя.workers.dev */
 function fileSay(text,slow,onFail){
   try{
     if(AU.tts)AU.tts.pause();
-    const a=new Audio("audio/"+h32(text)+".mp3");a.preload="auto";a.playbackRate=slow?.7:1;AU.tts=a;
+    const a=new Audio(AUDIO_API?AUDIO_API+"/tts?t="+encodeURIComponent(text):"audio/"+h32(text)+".mp3");a.preload="auto";a.playbackRate=slow?.7:1;AU.tts=a;
     let f=false;const fail=()=>{if(!f){f=true;onFail()}};
     a.onerror=fail;
     const p=a.play();
@@ -624,7 +625,7 @@ function soundTest(){
   unlockAudio();SFX.ok();setTimeout(()=>say("Hello, how are you?"),700);
   let nat="speechSynthesis" in window,n=0;try{n=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang)).length}catch(e){}
   const st=AU.ctx?AU.ctx.state:"недоступно";
-  setTimeout(()=>{fetch("audio/"+h32("Hello, how are you?")+".mp3",{method:"HEAD"}).then(r=>{const e=$("#fchk");if(e)e.textContent=r.ok?"найдены ✓":"не найдены (запустите генератор озвучки)"}).catch(()=>{const e=$("#fchk");if(e)e.textContent="недоступны"})},50);
+  setTimeout(()=>{fetch(AUDIO_API?AUDIO_API+"/tts?t="+encodeURIComponent("Hello, how are you?"):"audio/"+h32("Hello, how are you?")+".mp3",{method:AUDIO_API?"GET":"HEAD"}).then(r=>{const e=$("#fchk");if(e)e.textContent=r.ok?"найдены ✓":"не найдены (запустите генератор озвучки)"}).catch(()=>{const e=$("#fchk");if(e)e.textContent="недоступны"})},50);
   $("#diag").innerHTML="Звуковой движок: <b>"+st+"</b> · Синтез речи: <b>"+(nat?"есть":"нет")+"</b> · Английских голосов: <b>"+n+"</b><br>Файлы озвучки слов: <b id='fchk'>проверка…</b><br>Нет звука? Увеличьте громкость мультимедиа, выключите беззвучный режим (на iPhone — боковой переключатель) и коснитесь экрана.";
 }
 function buzz(kind){
