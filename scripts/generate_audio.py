@@ -31,7 +31,7 @@ INDEX = ROOT / "index.html"
 OUT = ROOT / "audio"
 META = OUT / "_meta.json"
 
-DEFAULT_VOICE = "en-US-AriaNeural"   # also: en-US-GuyNeural, en-GB-SoniaNeural, en-GB-RyanNeural
+DEFAULT_VOICE = "en-US-AvaMultilingualNeural"   # also: en-US-AndrewMultilingualNeural, en-US-AriaNeural, en-GB-SoniaNeural
 DEFAULT_RATE = "-10%"                # slower = easier for learners
 FORCE = "--force" in sys.argv or os.environ.get("FORCE", "").lower() == "true"
 
@@ -40,6 +40,7 @@ EL_VOICE = (os.environ.get("ELEVENLABS_VOICE_ID") or "").strip() or "hpp4J3VqNfW
 EL_MODEL = (os.environ.get("ELEVENLABS_MODEL") or "").strip() or "eleven_flash_v2_5"   # half the credits of multilingual_v2
 EL_BASE = (os.environ.get("ELEVENLABS_BASE_URL") or "").strip() or "https://api.elevenlabs.io"
 EL_STABILITY, EL_SIMILARITY, EL_SPEED = 0.5, 0.8, 0.95   # same settings as the Worker (/tts)
+QUOTA_HIT = False   # set when ElevenLabs says the monthly credits are used up
 
 
 def h32(s: str) -> str:
@@ -113,7 +114,10 @@ def make_eleven(text, path) -> bool:
             if _store(tmp, path):
                 return True
         except urllib.error.HTTPError as e:
-            detail = e.read()[:200].decode("utf-8", "replace")
+            detail = e.read()[:400].decode("utf-8", "replace")
+            if "quota_exceeded" in detail:
+                global QUOTA_HIT
+                QUOTA_HIT = True
             print(f"  ElevenLabs HTTP {e.code} for {text!r}: {detail}", flush=True)
             if e.code in (401, 402, 403, 422):   # key / plan / quota problem: retrying will not help
                 return False
@@ -208,12 +212,17 @@ async def main() -> int:
 
     E = Engines()
     failed = []
+    have_all = all((OUT / f"{h32(t)}.mp3").exists() for t in texts)
     for i, t in enumerate(texts, 1):
         h = h32(t)
         f = OUT / f"{h}.mp3"
         if h in done and f.exists() and f.stat().st_size > 500:
             continue
         ok = await synth(t, f, voice, rate, E)
+        if QUOTA_HIT and have_all:   # credits are gone: keep the current files untouched instead of replacing them with worse ones
+            print("STOP: ElevenLabs credits are used up (quota_exceeded). The existing audio files were NOT changed.\n"
+                  "Run again when the credits are back, or choose engine=free in the workflow to use a free Microsoft voice.", flush=True)
+            return 3
         print(f"[{i}/{len(texts)}] {'ok  ' if ok else 'FAIL'} {t}", flush=True)
         if ok:
             done.add(h)

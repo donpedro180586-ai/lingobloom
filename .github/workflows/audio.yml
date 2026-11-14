@@ -6,13 +6,24 @@ on:
       voice:
         description: Voice
         type: choice
-        default: en-US-AriaNeural
+        default: en-US-AvaMultilingualNeural
         options:
+          - en-US-AvaMultilingualNeural
+          - en-US-AndrewMultilingualNeural
+          - en-US-EmmaMultilingualNeural
+          - en-US-BrianMultilingualNeural
           - en-US-AriaNeural
           - en-US-GuyNeural
           - en-US-JennyNeural
           - en-GB-SoniaNeural
           - en-GB-RyanNeural
+      engine:
+        description: "auto = ElevenLabs if it has credits, free = Microsoft voice only (no credits needed)"
+        type: choice
+        default: auto
+        options:
+          - auto
+          - free
       rate:
         description: "Speed (e.g. -20% slower, -10% default, +0% normal)"
         type: string
@@ -45,7 +56,7 @@ jobs:
           TTS_VOICE: ${{ inputs.voice }}
           TTS_RATE: ${{ inputs.rate }}
           FORCE: ${{ inputs.force }}
-          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ inputs.engine != 'free' && secrets.ELEVENLABS_API_KEY || '' }}
       - name: Commit audio files
         if: always()
         run: |
