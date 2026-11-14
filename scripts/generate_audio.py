@@ -213,23 +213,47 @@ async def main() -> int:
     E = Engines()
     failed = []
     have_all = all((OUT / f"{h32(t)}.mp3").exists() for t in texts)
+    budget = float(os.environ.get("MAX_MINUTES") or 0) * 60   # stop politely before the job timeout (0 = no limit)
+    t0 = time.monotonic()
+    todo = []
     for i, t in enumerate(texts, 1):
-        h = h32(t)
-        f = OUT / f"{h}.mp3"
-        if h in done and f.exists() and f.stat().st_size > 500:
-            continue
-        ok = await synth(t, f, voice, rate, E)
-        if QUOTA_HIT and have_all:   # credits are gone: keep the current files untouched instead of replacing them with worse ones
-            print("STOP: ElevenLabs credits are used up (quota_exceeded). The existing audio files were NOT changed.\n"
-                  "Run again when the credits are back, or choose engine=free in the workflow to use a free Microsoft voice.", flush=True)
-            return 3
-        print(f"[{i}/{len(texts)}] {'ok  ' if ok else 'FAIL'} {t}", flush=True)
-        if ok:
-            done.add(h)
-        else:
-            failed.append(t)
-        if i % 10 == 0:
-            save_meta({"voice": label, "rate": rate, "done": sorted(done)})
+        f = OUT / f"{h32(t)}.mp3"
+        if not (h32(t) in done and f.exists() and f.stat().st_size > 500):
+            todo.append((i, t))
+    state = {"stop": False, "late": False, "n": 0}
+    sem = asyncio.Semaphore(1 if E.eleven else 4)   # ElevenLabs one at a time, free voices four at a time
+
+    async def one(i, t):
+        async with sem:
+            if state["stop"]:
+                return
+            if budget and time.monotonic() - t0 > budget:
+                state["late"] = True
+                return
+            ok = await synth(t, OUT / f"{h32(t)}.mp3", voice, rate, E)
+            if QUOTA_HIT and have_all:   # credits are gone: keep the current files instead of replacing them with worse ones
+                state["stop"] = True
+                return
+            print(f"[{i}/{len(texts)}] {'ok  ' if ok else 'FAIL'} {t}", flush=True)
+            if ok:
+                done.add(h32(t))
+            else:
+                failed.append(t)
+            state["n"] += 1
+            if state["n"] % 10 == 0:
+                save_meta({"voice": label, "rate": rate, "done": sorted(done)})
+
+    await asyncio.gather(*(one(i, t) for i, t in todo))
+    if state["stop"]:
+        print("STOP: ElevenLabs credits are used up (quota_exceeded). The existing audio files were NOT changed.\n"
+              "Run again when the credits are back, or choose engine=free in the workflow to use a free Microsoft voice.", flush=True)
+        return 3
+    if state["late"]:
+        save_meta({"voice": label, "rate": rate, "done": sorted(done)})
+        left = len([1 for _, t in todo if h32(t) not in done])
+        print(f"PARTIAL: time budget reached, {left} of {len(texts)} still to do. "
+              f"Run the workflow again (leave 'force' OFF) to continue.", flush=True)
+        return 0
 
     if failed:  # one more try, now with whichever engine is active
         print(f"Retrying {len(failed)} item(s)", flush=True)

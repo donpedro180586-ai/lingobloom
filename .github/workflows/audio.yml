@@ -44,7 +44,7 @@ permissions:
 jobs:
   audio:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -56,6 +56,7 @@ jobs:
           TTS_VOICE: ${{ inputs.voice }}
           TTS_RATE: ${{ inputs.rate }}
           FORCE: ${{ inputs.force }}
+          MAX_MINUTES: "32"
           ELEVENLABS_API_KEY: ${{ inputs.engine != 'free' && secrets.ELEVENLABS_API_KEY || '' }}
       - name: Commit audio files
         if: always()
