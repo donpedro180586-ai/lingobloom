@@ -593,6 +593,23 @@ function cloudSay(text,slow,i){
 /* Pre-recorded files: audio/<hash>.mp3 (made by scripts/generate_audio.py) */
 const AUDIO_API="https://quiet-frog-ca80lingobloom-premium.donpedro180586.workers.dev"; /* Worker: /tts озвучивает новые фразы голосом ElevenLabs */
 function h32(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,"0")}
+/* Голос с сервера (новые фразы) обрабатываем так же, как готовые файлы: ярче и ровнее по громкости */
+function voiceChain(c,dest,gain){
+  const bq=(type,f,q,g)=>{const n=c.createBiquadFilter();n.type=type;n.frequency.value=f;n.Q.value=q;if(g!=null)n.gain.value=g;return n};
+  const hp=bq("highpass",80,.7),m1=bq("peaking",250,1,-2),p1=bq("peaking",3000,.9,3),p2=bq("peaking",5500,.8,2.5),sh=bq("highshelf",8000,.7,3);
+  const comp=c.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=2.5;comp.attack.value=.005;comp.release.value=.08;
+  const out=c.createGain();out.gain.value=gain;
+  const lim=c.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.05;
+  hp.connect(m1);m1.connect(p1);p1.connect(p2);p2.connect(sh);sh.connect(comp);comp.connect(out);out.connect(lim);lim.connect(dest);
+  return hp;
+}
+function voiceGain(buf){
+  const d=buf.getChannelData(0);let pk=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}
+  if(pk<1e-4)return 1;
+  const thr=pk*.02;let sum=0,n=0;for(let i=0;i<d.length;i++){const v=d[i];if(Math.abs(v)>thr){sum+=v*v;n++}}
+  const db=v=>20*Math.log10(Math.max(v,1e-9)),rms=db(Math.sqrt(sum/Math.max(n,1))),g=Math.max(-12,Math.min(12,Math.min(-17.5-rms,-3-db(pk))));
+  return Math.pow(10,g/20);
+}
 function fileSay(text,slow,onFail){
   try{
     if(AU.tts)AU.tts.pause();
@@ -601,13 +618,29 @@ function fileSay(text,slow,onFail){
     if(AUDIO_API)srcs.push(AUDIO_API+"/tts?t="+encodeURIComponent(text));
     let i=0,f=false;
     const fail=()=>{if(!f){f=true;onFail()}};
-    const go=()=>{
+    const plainGo=()=>{
       const a=new Audio(srcs[i]);a.preload="auto";a.playbackRate=slow?.7:1;AU.tts=a;
       let d=false;const next=()=>{if(d||AU.tts!==a)return;d=true;if(++i<srcs.length)go();else fail()};
       a.onplaying=()=>{if(AU.tts===a)duck(true)};a.onended=a.onpause=()=>{if(AU.tts===a)duck(false)};
       a.onerror=()=>{if(AU.tts===a)duck(false);next()};
       const p=a.play();
       if(p&&p.catch)p.catch(e=>{if(e&&e.name==="NotAllowedError"){if(!AU.warned2){AU.warned2=1;toast("🔊 Нажмите на кнопку динамика, чтобы услышать слово")}}else next()});
+    };
+    /* клип с сервера: через Web Audio с тем же «осветлением»; при любой неудаче играем обычным способом */
+    const waGo=()=>{
+      const w={dead:0,pause(){this.dead=1;try{this.s&&this.s.stop()}catch(e){}duck(false)}};AU.tts=w;
+      fetch(srcs[i]).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()})
+        .then(ab=>new Promise((ok,no)=>{const q=AU.ctx.decodeAudioData(ab,ok,no);if(q&&q.catch)q.catch(no)}))
+        .then(buf=>{
+          if(AU.tts!==w||w.dead)return;
+          const c=AU.ctx,s=c.createBufferSource();s.buffer=buf;s.connect(voiceChain(c,c.destination,voiceGain(buf)));
+          w.s=s;s.onended=()=>{if(AU.tts===w)duck(false)};duck(true);s.start();
+        })
+        .catch(()=>{if(AU.tts===w&&!w.dead)plainGo()});
+    };
+    const go=()=>{
+      let ok=false;try{ok=i>0&&!slow&&AU.ctx&&AU.ctx.state==="running"&&typeof fetch==="function"}catch(e){}
+      if(ok)waGo();else plainGo();
     };
     go();
   }catch(e){onFail()}
