@@ -471,9 +471,11 @@ function initAudio(){
   AU.sfx.connect(AU.master);AU.sfx.connect(sw);sw.connect(conv);
   applyVol();
 }
+/* пока звучит голос, фоновая музыка тише, чтобы слово было слышно чётко */
+function duck(on){AU.duck=on?.3:1;clearTimeout(AU.dkT);if(on)AU.dkT=setTimeout(()=>duck(false),15000);try{applyVol()}catch(e){}}
 function applyVol(){
   if(!AU.ctx)return;const t=AU.ctx.currentTime;
-  AU.mus.gain.setTargetAtTime(S.set.music?S.set.mv*.55:0,t,.3);
+  AU.mus.gain.setTargetAtTime(S.set.music?S.set.mv*.55*(AU.duck||1):0,t,.15);
   AU.sfx.gain.setTargetAtTime(S.set.sfx?S.set.sv:0,t,.05);
 }
 function note(f,t,d,type,v,dest,att){
@@ -602,7 +604,8 @@ function fileSay(text,slow,onFail){
     const go=()=>{
       const a=new Audio(srcs[i]);a.preload="auto";a.playbackRate=slow?.7:1;AU.tts=a;
       let d=false;const next=()=>{if(d||AU.tts!==a)return;d=true;if(++i<srcs.length)go();else fail()};
-      a.onerror=next;
+      a.onplaying=()=>{if(AU.tts===a)duck(true)};a.onended=a.onpause=()=>{if(AU.tts===a)duck(false)};
+      a.onerror=()=>{if(AU.tts===a)duck(false);next()};
       const p=a.play();
       if(p&&p.catch)p.catch(e=>{if(e&&e.name==="NotAllowedError"){if(!AU.warned2){AU.warned2=1;toast("🔊 Нажмите на кнопку динамика, чтобы услышать слово")}}else next()});
     };
@@ -623,8 +626,8 @@ function sayFallback(text,slow,my){
   if(!n||!hasEnVoice())return cloudSay(text,slow);
   try{
     const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=(S.set.rate||.9)*(slow?.6:1);if(enVoice)u.voice=enVoice;
-    let started=false;u.onstart=()=>{started=true};
-    u.onerror=e=>{if(!started&&my===AU.sayId&&e.error!=="canceled"&&e.error!=="interrupted")cloudSay(text,slow)};
+    let started=false;u.onstart=()=>{started=true;duck(true)};u.onend=()=>{if(my===AU.sayId)duck(false)};
+    u.onerror=e=>{duck(false);if(!started&&my===AU.sayId&&e.error!=="canceled"&&e.error!=="interrupted")cloudSay(text,slow)};
     speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);
     setTimeout(()=>{if(!started&&my===AU.sayId&&!speechSynthesis.speaking)cloudSay(text,slow)},1500);
   }catch(e){cloudSay(text,slow)}

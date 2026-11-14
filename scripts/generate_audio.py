@@ -26,6 +26,12 @@ import time
 import urllib.error
 import urllib.request
 
+try:  # brighter, evenly loud clips (needs ffmpeg; silently skipped if it is missing)
+    from polish import polish_file
+except Exception:  # pragma: no cover
+    def polish_file(_path):
+        return False
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "index.html"
 OUT = ROOT / "audio"
@@ -88,6 +94,10 @@ def save_meta(meta: dict) -> None:
 
 def _store(tmp: pathlib.Path, path: pathlib.Path) -> bool:
     if tmp.exists() and tmp.stat().st_size > 500:
+        polish_file(tmp)        # brighter + even loudness (same voice)
+        if tmp.stat().st_size <= 500:
+            tmp.unlink()
+            return False
         os.replace(tmp, path)   # only now the old file is replaced
         return True
     if tmp.exists():
