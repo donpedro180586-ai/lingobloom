@@ -70,6 +70,22 @@ def collect() -> list[str]:
     for sentence, _ru in data["examples"].values():
         texts.append(sentence)
     texts.append("Hello, how are you?")  # used by the sound test
+    # stories (lines) and the phrasebook (English side) - same voice as the words
+    for name in ("STORIES", "PB"):
+        mm = re.search(r"const %s=(\[.*?\]);\s*\n" % name, src, re.S)
+        if not mm:
+            continue
+        try:
+            arr = json.loads(mm.group(1))
+        except Exception:
+            continue
+        if name == "STORIES":
+            for st in arr:
+                for ln in st.get("lines", []):
+                    texts.append(ln[0])
+        else:
+            for pair in arr:
+                texts.append(pair[1])
     seen, out = set(), []
     for t in texts:
         if t not in seen:
