@@ -472,7 +472,7 @@ function initAudio(){
   applyVol();
 }
 /* пока звучит голос, фоновая музыка тише, чтобы слово было слышно чётко */
-function duck(on){AU.duck=on?.15:1;clearTimeout(AU.dkT);if(on)AU.dkT=setTimeout(()=>duck(false),15000);try{applyVol()}catch(e){}}
+function duck(on){AU.duck=on?.2:1;clearTimeout(AU.dkT);if(on)AU.dkT=setTimeout(()=>duck(false),15000);try{applyVol()}catch(e){}}
 function applyVol(){
   if(!AU.ctx)return;const t=AU.ctx.currentTime;
   AU.mus.gain.setTargetAtTime(S.set.music?S.set.mv*.55*(AU.duck||1):0,t,.15);
@@ -596,18 +596,17 @@ function h32(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);
 /* Голос с сервера (новые фразы) обрабатываем так же, как готовые файлы: ярче и ровнее по громкости */
 function voiceChain(c,dest,gain){
   const bq=(type,f,q,g)=>{const n=c.createBiquadFilter();n.type=type;n.frequency.value=f;n.Q.value=q;if(g!=null)n.gain.value=g;return n};
-  const hp=bq("highpass",80,.7),m1=bq("peaking",230,1,-4),p1=bq("peaking",3000,.9,5.5),p2=bq("peaking",5000,.8,5),sh=bq("highshelf",8500,.7,6);
-  const comp=c.createDynamicsCompressor();comp.threshold.value=-20;comp.knee.value=6;comp.ratio.value=2.5;comp.attack.value=.005;comp.release.value=.08;
+  const hp=bq("highpass",70,.7),p1=bq("peaking",3500,1,1.5),sh=bq("highshelf",9000,.7,1.5);
   const out=c.createGain();out.gain.value=gain;
   const lim=c.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=.001;lim.release.value=.05;
-  hp.connect(m1);m1.connect(p1);p1.connect(p2);p2.connect(sh);sh.connect(comp);comp.connect(out);out.connect(lim);lim.connect(dest);
+  hp.connect(p1);p1.connect(sh);sh.connect(out);out.connect(lim);lim.connect(dest);
   return hp;
 }
 function voiceGain(buf){
   const d=buf.getChannelData(0);let pk=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}
   if(pk<1e-4)return 1;
   const thr=pk*.02;let sum=0,n=0;for(let i=0;i<d.length;i++){const v=d[i];if(Math.abs(v)>thr){sum+=v*v;n++}}
-  const db=v=>20*Math.log10(Math.max(v,1e-9)),rms=db(Math.sqrt(sum/Math.max(n,1))),g=Math.max(-12,Math.min(12,Math.min(-15-rms,-3-db(pk))));
+  const db=v=>20*Math.log10(Math.max(v,1e-9)),rms=db(Math.sqrt(sum/Math.max(n,1))),g=Math.max(-12,Math.min(12,Math.min(-16.5-rms,-3-db(pk))));
   return Math.pow(10,g/20);
 }
 function fileSay(text,slow,onFail){
