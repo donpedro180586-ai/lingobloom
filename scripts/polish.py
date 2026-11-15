@@ -9,7 +9,7 @@ import pathlib
 import shutil
 import subprocess
 
-TARGET_RMS_DB = -15.5   # loudness of the speech itself (dBFS)
+TARGET_RMS_DB = -13.5   # loudness of the speech itself (dBFS)
 PEAK_CEILING_DB = -1.0  # never louder than this
 EQ = (
     "highpass=f=80,"                           # remove rumble
@@ -18,6 +18,15 @@ EQ = (
     "equalizer=f=5500:t=q:w=0.8:g=2.5,"        # air
     "highshelf=f=8000:g=3,"                    # sparkle
     "acompressor=threshold=0.125:ratio=2.5:attack=5:release=60:makeup=1"
+)
+# second pass ("ярче"): stronger presence + air, less mud. Applied to every clip made before it existed
+# by scripts/boost_audio.py, and in the same pass as EQ for every new clip.
+EQ_BOOST = (
+    "equalizer=f=200:t=q:w=1:g=-2,"
+    "equalizer=f=2800:t=q:w=0.9:g=3,"
+    "equalizer=f=4500:t=q:w=0.8:g=3,"
+    "highshelf=f=9000:g=4,"
+    "acompressor=threshold=0.06:ratio=4:attack=3:release=50:makeup=3"
 )
 
 
@@ -44,20 +53,21 @@ def _levels(a):
     return db(rms), db(peak)
 
 
-def polish_file(path) -> bool:
+def polish_file(path, eq=None) -> bool:
     """Replace the mp3 at `path` with a brighter version. Returns True if changed."""
     if not shutil.which("ffmpeg"):
         return False
+    eq = eq or (EQ + "," + EQ_BOOST)
     path = pathlib.Path(path)
     tmp = path.with_name(path.stem + ".polish.mp3")
     try:
-        lv = _levels(_pcm(path, EQ))
+        lv = _levels(_pcm(path, eq))
         if not lv:
             return False
         rms, peak = lv
-        gain = min(TARGET_RMS_DB - rms, PEAK_CEILING_DB - peak)
+        gain = min(TARGET_RMS_DB - rms, PEAK_CEILING_DB - peak + 4.0)  # the limiter catches the extra peaks
         gain = max(min(gain, 12.0), -12.0)
-        af = f"{EQ},volume={gain:.2f}dB,alimiter=limit=0.89:level=disabled"
+        af = f"{eq},volume={gain:.2f}dB,alimiter=limit=0.89:level=disabled"
         subprocess.run(
             ["ffmpeg", "-v", "error", "-y", "-i", str(path), "-af", af, "-ac", "1", "-ar", "44100",
              "-c:a", "libmp3lame", "-b:a", "128k", str(tmp)],
