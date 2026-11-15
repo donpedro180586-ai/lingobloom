@@ -235,6 +235,19 @@ main.pgin h2::after{content:"";display:block;height:1px;width:0;background:var(-
 .avpick{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:10px 0}
 .avb{border:1px solid var(--line);background:transparent;border-radius:12px;font-size:20px;padding:8px 0;cursor:pointer}
 .avb.on{border-color:var(--a);background:var(--gt)}
+.cs{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+.cs .cb{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:16px;padding:12px 14px;text-align:left;cursor:pointer}
+.cs .cb .ce{font-size:30px}.cs .cb b{display:block;font-size:15px}.cs .cb small{color:var(--muted);font-size:12px}.cs .cb .cp{margin-left:auto;white-space:nowrap;font-weight:600}
+.cs .cb:disabled{opacity:.5}
+.cres{border:1px solid var(--line2);border-radius:18px;padding:16px;margin:12px 0;text-align:center;background:var(--surface)}
+.cres .big{width:140px;height:84px;border-radius:14px;margin:8px auto;display:grid;place-items:center}
+.cres.spin .big{animation:cpulse .25s infinite alternate}@keyframes cpulse{to{transform:scale(1.06)}}
+.rar{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.r1{color:#9aa3ad}.r2{color:#5aa9ff}.r3{color:#b57bff}.r4{color:#ffb740}
+.cpool{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.cpool .pi{height:44px;border-radius:9px;display:grid;place-items:center;border:2px solid transparent;position:relative}
+.cpool .pi.has::after{content:"✓";position:absolute;right:2px;top:0;font-size:10px;color:#fff;text-shadow:0 0 3px #000}
+.cpool .pi.r1{border-color:#9aa3ad}.cpool .pi.r2{border-color:#5aa9ff}.cpool .pi.r3{border-color:#b57bff}.cpool .pi.r4{border-color:#ffb740}
 .shopg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
 .si{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:16px;padding:10px;text-align:left;cursor:pointer;transition:transform .12s,border-color .2s}
 .si:active{transform:scale(.97)}.si.on{border-color:var(--a);background:var(--gt)}
@@ -2296,6 +2309,51 @@ function buy(id){
   if(S.coins<price){toast("Не хватает монет: нужно 🪙 "+price);return}
   S.coins-=price;own.push(id);S.prof[k]=id;save();SFX.ok();confetti(60);toast("Куплено: "+it[1]);Me();
 }
+
+/* ---- Кейсы: призы берутся из BANNERS и FRAMES, новые предметы попадают в кейсы сами ---- */
+const CASES=[["cs1","📦","Обычный кейс",150,0,1.6],["cs2","🎁","Редкий кейс",400,200,.8],["cs3","👑","Королевский кейс",900,400,.2]];
+let casesOpen=false,caseRes=null,caseBusy=false;
+function caseItems(){
+  const a=[];BANNERS.forEach(x=>{if(x[3]>0&&x[0]!=="b0")a.push({id:x[0],name:x[1],price:x[3],b:1,bg:x[2]})});
+  FRAMES.forEach(x=>{if(x[2]>0&&x[0]!=="f0")a.push({id:x[0],name:x[1],price:x[2],b:0})});return a;
+}
+function rarOf(p){return p<=200?1:p<=400?2:p<=600?3:4}
+const RARN=["","Обычный","Редкий","Эпический","Легендарный"],RARF=["","Обычная","Редкая","Эпическая","Легендарная"];
+function caseHas(it){return (it.b?S.own.banners:S.own.frames).includes(it.id)}
+function caseTile(it,has){const c="pi r"+rarOf(it.price)+(has?" has":"");return it.b?`<div class="${c}" style="background:${it.bg}"></div>`:`<div class="${c}">${avatarHTML(IMGF[it.id]?30:34,it.id)}</div>`}
+function casePool(c){return caseItems().filter(it=>it.price>=c[4])}
+function casePick(c){
+  const pool=casePool(c);if(!pool.length)return null;
+  const w=pool.map(it=>Math.pow(1/it.price,c[5]));const sum=w.reduce((x,y)=>x+y,0);let r=Math.random()*sum;
+  for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0)return pool[i]}return pool[pool.length-1];
+}
+function casesCard(){
+  const res=caseRes;
+  return `<details class="card pedit" id="casesd"${casesOpen?" open":""}><summary class="muted" style="cursor:pointer">🎁 Кейсы · баннеры и рамки · 🪙 ${S.coins}</summary>
+  <div class="muted" style="margin-top:12px">Открой кейс и получи случайный баннер или рамку. Чем дороже кейс, тем реже и красивее призы. Если предмет уже есть, вернём часть монет.</div>
+  ${res?`<div class="cres${res.spin?" spin":""}">${res.it?`<div class="big" ${res.it.b?`style="background:${res.it.bg}"`:""}>${res.it.b?"":avatarHTML(IMGF[res.it.id]?56:64,res.it.id)}</div><b>${esc(res.it.name)}</b><div><span class="rar r${rarOf(res.it.price)}">${res.it.b?RARN[rarOf(res.it.price)]+" баннер":RARF[rarOf(res.it.price)]+" рамка"}</span></div>${res.spin?"":`<div class="muted" style="margin:8px 0">${res.dup?"Уже было: вернули 🪙 "+res.dup:"Новый предмет в коллекции!"}</div><button class="btn" id="cwear" style="padding:9px 16px">Надеть</button>`}`:"…"}</div>`:""}
+  <div class="cs">${CASES.map(c=>`<button class="cb" data-case="${c[0]}"${caseBusy?" disabled":""}><span class="ce">${c[1]}</span><span><b>${c[2]}</b><small>${casePool(c).length} предметов${c[4]?" · ценнее 🪙 "+c[4]:""}</small></span><span class="cp">🪙 ${pp(c[3])}</span></button>`).join("")}</div>
+  <details><summary class="muted" style="cursor:pointer;font-size:13px">Что внутри (${caseItems().length} предметов)</summary>
+  <div class="cpool">${caseItems().sort((x,y)=>x.price-y.price).map(it=>caseTile(it,caseHas(it))).join("")}</div></details></details>`;
+}
+function openCase(id){
+  const c=CASES.find(x=>x[0]===id);if(!c||caseBusy)return;const price=pp(c[3]);
+  if(S.coins<price){toast("Не хватает монет: нужно 🪙 "+price);return}
+  const pool=casePool(c);if(!pool.length){toast("В этом кейсе пока пусто");return}
+  S.coins-=price;caseBusy=true;save();hud();casesOpen=true;
+  let n=0;const tick=()=>{
+    caseRes={spin:1,it:pool[Math.floor(Math.random()*pool.length)]};Me();SFX.pop();
+    if(++n<9){setTimeout(tick,110+n*28);return}
+    const it=casePick(c);let dup=0;const own=it.b?S.own.banners:S.own.frames;
+    if(own.includes(it.id)){dup=Math.round(it.price*.5);S.coins+=dup}else own.push(it.id);
+    S.casesOpened=(S.casesOpened||0)+1;save();hud();caseBusy=false;caseRes={it,dup,spin:0};SFX.level();confetti(rarOf(it.price)>=3?150:70);Me();
+  };tick();
+}
+function bindCases(){
+  const d=$("#casesd");if(!d)return;d.ontoggle=e=>{if(e.target===d)casesOpen=d.open};
+  view.querySelectorAll("[data-case]").forEach(b=>b.onclick=()=>openCase(b.dataset.case));
+  const w=$("#cwear");if(w)w.onclick=()=>{const it=caseRes&&caseRes.it;if(!it)return;S.prof[it.b?"banner":"frame"]=it.id;save();SFX.ok();toast("Надето: "+it.name);caseRes=null;Me()};
+}
 function Me(){
   const acc=S.stats.a?Math.round(S.stats.c/S.stats.a*100):0,P=S.prof,B=P.banner==="bc"&&P.custom&&S.prem?["bc","Свой баннер","url('"+P.custom+"') center/cover no-repeat",CUSTOM_PRICE,P.customLight?1:0]:bannerOf(P.banner),need=100-S.xp%100,isB=shopTab==="b",own=isB?S.own.banners:S.own.frames;
   view.innerHTML=`
@@ -2325,6 +2383,7 @@ function Me(){
   <div class="shopg">${isB?customTile():customFrameTile()}${S.prem?premTiles(isB):""}${(isB?BANNERS:FRAMES).map(it=>{const id=it[0],price=pp(isB?it[3]:it[2]),has=own.includes(id),eq=(isB?P.banner:P.frame)===id;
     return `<button class="si${eq?" on":""}" data-it="${id}"><div class="pv"${isB?` style="background:${it[2]}"`:""}>${isB?"":avatarHTML(IMGF[id]?34:46,id)}</div><b>${it[1]}</b><span>${eq?"✓ Надето":has?"Куплено · надеть":"🪙 "+price}</span></button>`}).join("")}</div>
   ${isB?"":`<div class="note" style="text-align:left">${Object.values(FRNOTE).join(" · ")}. Своя рамка: черно-белый рисунок на белом фоне или PNG с прозрачным фоном.</div>`}</details>
+  ${casesCard()}
   <input id="bf" type="file" accept="image/*" hidden><input id="ff" type="file" accept="image/*" hidden>
   <button class="btn" id="go" style="width:100%;padding:16px;margin:18px 0 6px;font-size:15px">Начать учиться →</button>
   <h2>Достижения</h2>
@@ -2346,6 +2405,7 @@ function Me(){
   <div class="row"><button class="btn ghost" id="rst">Сбросить прогресс</button></div>`;
   view.querySelector(".pedit").ontoggle=e=>{meOpen=e.target.open};
   $("#shopd").ontoggle=e=>{shopOpen=e.target.open};
+  bindCases();
   bindPrem();
   $("#pn").oninput=e=>{S.prof.name=e.target.value.trim().slice(0,16);save();view.querySelector(".pname").textContent=S.prof.name||"Ученик"};
   view.querySelectorAll("[data-av]").forEach(b=>b.onclick=()=>{S.prof.av=b.dataset.av;S.prof.photo="";save();SFX.pop();Me()});
