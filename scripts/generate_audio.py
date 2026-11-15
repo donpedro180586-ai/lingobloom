@@ -110,7 +110,8 @@ def save_meta(meta: dict) -> None:
 
 def _store(tmp: pathlib.Path, path: pathlib.Path) -> bool:
     if tmp.exists() and tmp.stat().st_size > 500:
-        polish_file(tmp)        # brighter + even loudness (same voice)
+        if os.environ.get('POLISH')=='1':
+            polish_file(tmp)        # brighter + even loudness (same voice)
         if tmp.stat().st_size <= 500:
             tmp.unlink()
             return False

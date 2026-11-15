@@ -638,7 +638,7 @@ function fileSay(text,slow,onFail){
         .catch(()=>{if(AU.tts===w&&!w.dead)plainGo()});
     };
     const go=()=>{
-      let ok=false;try{ok=i>0&&!slow&&AU.ctx&&AU.ctx.state==="running"&&typeof fetch==="function"}catch(e){}
+      let ok=false;try{ok=false}catch(e){}
       if(ok)waGo();else plainGo();
     };
     go();
