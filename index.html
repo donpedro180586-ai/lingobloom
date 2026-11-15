@@ -2340,14 +2340,22 @@ function openCase(id){
   const c=CASES.find(x=>x[0]===id);if(!c||caseBusy)return;const price=pp(c[3]);
   if(S.coins<price){toast("Не хватает монет: нужно 🪙 "+price);return}
   const pool=casePool(c);if(!pool.length){toast("В этом кейсе пока пусто");return}
-  S.coins-=price;caseBusy=true;save();hud();casesOpen=true;
+  S.coins-=price;caseBusy=true;save();hud();casesOpen=true;caseRefresh();
   let n=0;const tick=()=>{
-    caseRes={spin:1,it:pool[Math.floor(Math.random()*pool.length)]};Me();SFX.pop();
+    caseRes={spin:1,it:pool[Math.floor(Math.random()*pool.length)]};caseRefresh();SFX.pop();
     if(++n<9){setTimeout(tick,110+n*28);return}
     const it=casePick(c);let dup=0;const own=it.b?S.own.banners:S.own.frames;
     if(own.includes(it.id)){dup=Math.round(it.price*.5);S.coins+=dup}else own.push(it.id);
-    S.casesOpened=(S.casesOpened||0)+1;save();hud();caseBusy=false;caseRes={it,dup,spin:0};SFX.level();confetti(rarOf(it.price)>=3?150:70);Me();
+    S.casesOpened=(S.casesOpened||0)+1;save();hud();caseBusy=false;caseRes={it,dup,spin:0};SFX.level();confetti(rarOf(it.price)>=3?150:70);caseRefresh();
   };tick();
+}
+function caseRefresh(){
+  const d=$("#casesd");if(!d||tab!=="me"){return}
+  const y=window.scrollY,t=document.createElement("div");t.innerHTML=casesCard();const n=t.firstElementChild;
+  n.style.animation="none";d.replaceWith(n);bindCases();
+  view.querySelectorAll(".phead .pill").forEach(e=>{if(/🪙/.test(e.textContent))e.textContent="🪙 "+S.coins});
+  const sm=$("#shopd summary");if(sm)sm.textContent="🛍 Магазин · 🪙 "+S.coins;
+  window.scrollTo(0,y);
 }
 function bindCases(){
   const d=$("#casesd");if(!d)return;d.ontoggle=e=>{if(e.target===d)casesOpen=d.open};
