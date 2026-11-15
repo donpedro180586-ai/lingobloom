@@ -472,7 +472,7 @@ function initAudio(){
   applyVol();
 }
 /* пока звучит голос, фоновая музыка тише, чтобы слово было слышно чётко */
-function duck(on){AU.duck=on?.2:1;clearTimeout(AU.dkT);if(on)AU.dkT=setTimeout(()=>duck(false),15000);try{applyVol()}catch(e){}}
+function duck(on){AU.duck=on?.12:1;clearTimeout(AU.dkT);if(on)AU.dkT=setTimeout(()=>duck(false),15000);try{applyVol()}catch(e){}}
 function applyVol(){
   if(!AU.ctx)return;const t=AU.ctx.currentTime;
   AU.mus.gain.setTargetAtTime(S.set.music?S.set.mv*.55*(AU.duck||1):0,t,.15);
@@ -606,7 +606,7 @@ function voiceGain(buf){
   const d=buf.getChannelData(0);let pk=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}
   if(pk<1e-4)return 1;
   const thr=pk*.02;let sum=0,n=0;for(let i=0;i<d.length;i++){const v=d[i];if(Math.abs(v)>thr){sum+=v*v;n++}}
-  const db=v=>20*Math.log10(Math.max(v,1e-9)),rms=db(Math.sqrt(sum/Math.max(n,1))),g=Math.max(-12,Math.min(12,Math.min(-16.5-rms,-3-db(pk))));
+  const db=v=>20*Math.log10(Math.max(v,1e-9)),rms=db(Math.sqrt(sum/Math.max(n,1))),g=Math.max(-12,Math.min(12,Math.min(-14-rms,-1-db(pk))));
   return Math.pow(10,g/20);
 }
 function fileSay(text,slow,onFail){
