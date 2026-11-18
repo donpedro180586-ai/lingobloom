@@ -2555,7 +2555,8 @@ function premCard(){
 function bindPrem(){const b=$("#pbuy");if(b)b.onclick=()=>{SFX.pop();premBuy()};const d=$("#pdb");if(d)d.onclick=premDaily;const w=$("#pwk");if(w)w.onclick=premWeekly}
 
 hud();render();premCheck();
-new MutationObserver(()=>{view.classList.remove("pgin");void view.offsetWidth;view.classList.add("pgin")}).observe(view,{childList:true});
+{let lastTab=tab;/* плавное появление только при смене раздела; внутри игр и уроков экран не мигает */
+new MutationObserver(()=>{if(tab===lastTab)return;lastTab=tab;view.classList.remove("pgin");void view.offsetWidth;view.classList.add("pgin");clearTimeout(window._pgt);window._pgt=setTimeout(()=>view.classList.remove("pgin"),900)}).observe(view,{childList:true})}
 {let n=0,t0=0;document.querySelector(".logo").addEventListener("click",()=>{const now=Date.now();n=now-t0>3000?1:n+1;t0=now;if(n>=7){n=0;tab="admin";redraw=null;SFX.pop();render()}})}
 </script>
 </body>
