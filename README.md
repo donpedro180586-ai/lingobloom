@@ -1,4 +1,4 @@
-# Learn English
+# LingoBloom
 
 Static site (GitHub Pages) for Russian speakers who learn English: alphabet, 11 lessons,
 games, music and sound effects. The interface is in Russian, the learned content is English.
