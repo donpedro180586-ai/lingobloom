@@ -87,6 +87,25 @@ h2{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.01em;
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .shake{animation:shake .4s}
 .prompt{padding:26px 18px}
+/* ---- живость: только движение, экран не темнеет ---- */
+@keyframes qin{from{transform:translateY(16px) scale(.97)}to{transform:none}}
+@keyframes oin{from{transform:translateX(-14px)}to{transform:none}}
+@keyframes okring{0%{box-shadow:0 0 0 0 rgba(127,184,154,.55)}100%{box-shadow:0 0 0 16px rgba(127,184,154,0)}}
+@keyframes bump{40%{transform:scale(1.35)}}
+@keyframes sheen{0%{background-position:-160% 0}60%,100%{background-position:260% 0}}
+@keyframes wob{0%,100%{transform:rotate(0)}15%{transform:rotate(-12deg)}30%{transform:rotate(10deg)}45%{transform:rotate(-6deg)}60%{transform:none}}
+@keyframes floatup{0%{transform:translateY(0) scale(.8)}100%{transform:translateY(-70px) scale(1.2);opacity:0}}
+.prompt{animation:qin .35s cubic-bezier(.2,.9,.3,1.2)}
+.opt{animation:oin .32s cubic-bezier(.2,.9,.3,1.1) backwards}
+.opt:nth-child(2){animation-delay:.05s}.opt:nth-child(3){animation-delay:.1s}.opt:nth-child(4){animation-delay:.15s}.opt:nth-child(5){animation-delay:.2s}
+.opt.ok{animation:pop .4s,okring .6s}
+.opt.ok::after{content:" ✓";color:var(--ok);font-weight:700}
+.combo:not(:empty){display:inline-block;animation:bump .4s}
+.card{transition:transform .15s,border-color .2s}.card:active{transform:scale(.99)}
+.btn.gold{background-size:220% 100%;background-image:linear-gradient(110deg,var(--a2) 0%,var(--g) 40%,#fff3cf 50%,var(--g) 60%,var(--a2) 100%);animation:sheen 3.2s ease-in-out infinite}
+#pstrip>span:first-child,.pill .crown{display:inline-block;animation:wob 2.6s ease-in-out infinite;transform-origin:50% 80%}
+.fx{position:fixed;z-index:60;pointer-events:none;font-weight:700;color:var(--g);font-size:22px;text-shadow:0 2px 8px rgba(0,0,0,.6);animation:floatup .9s ease-out forwards}
+@media(prefers-reduced-motion:reduce){.prompt,.opt,.opt.ok,.combo,.btn.gold,#pstrip>span:first-child{animation:none}}
 .combo{color:var(--g);font-weight:600;font-size:13px;letter-spacing:.06em}
 .fc{perspective:900px;height:240px;margin:16px 0;cursor:pointer}
 .fc .in{position:relative;height:100%;transition:transform .6s cubic-bezier(.3,1.1,.4,1);transform-style:preserve-3d}
@@ -719,8 +738,10 @@ function hud(){
   $("#hStreak").textContent="🔥 "+S.streak;
   $("#hLv").textContent="Ур. "+level()+" · "+S.xp+" XP";memeDot();
 }
+function fx(txt,x,y){const e=document.createElement("div");e.className="fx";e.textContent=txt;e.style.left=(x==null?innerWidth/2-20:x)+"px";e.style.top=(y==null?innerHeight*.45:y)+"px";document.body.appendChild(e);setTimeout(()=>e.remove(),950)}
 function gainXP(n){
   if(S.prem)n=Math.round(n*1.25);
+  try{fx("+"+n+" XP")}catch(e){}
   const old=level();S.xp+=n;const gc=Math.max(1,Math.round(n/2));S.coins=(S.coins||0)+gc*cm();
   if(!S.prem)S.miss=(S.miss||0)+gc;
   if(level()>old){S.coins+=50*cm();if(!S.prem)S.miss=(S.miss||0)+50;SFX.level();confetti(140);toast("🎉 Новый уровень: "+level()+"!"+(S.prem?"":" <small style='opacity:.8'>С 👑 Premium бонус ×2</small>"))}
