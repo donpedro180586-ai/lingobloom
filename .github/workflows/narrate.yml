@@ -1,0 +1,39 @@
+name: Narration for promo videos
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: Narrator voice
+        type: choice
+        default: ru-RU-SvetlanaNeural
+        options: [ru-RU-SvetlanaNeural, ru-RU-DmitryNeural]
+      rate:
+        description: "Speed (e.g. +0%, +8%, -5%)"
+        type: string
+        default: "+0%"
+permissions:
+  contents: write
+jobs:
+  narrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install edge-tts
+      - run: python scripts/narrate.py
+        env:
+          NARRATOR_VOICE: ${{ inputs.voice }}
+          NARRATOR_RATE: ${{ inputs.rate }}
+      - name: Commit narration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A video
+          if git diff --cached --quiet; then echo "No changes"; else
+            git commit -m "Narration for promo videos"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            git push
+          fi
