@@ -632,7 +632,7 @@ function cloudSay(text,slow,i){
   }catch(e){cloudSay(text,slow,i+1)}
 }
 /* Pre-recorded files: audio/<hash>.mp3 (made by scripts/generate_audio.py) */
-const AUDIO_V="9"; /* меняй при каждой новой озвучке: иначе Telegram показывает старые файлы из кеша */
+const AUDIO_V="10"; /* меняй при каждой новой озвучке: иначе Telegram показывает старые файлы из кеша */
 const AUDIO_API="https://quiet-frog-ca80lingobloom-premium.donpedro180586.workers.dev"; /* Worker: /tts озвучивает новые фразы голосом ElevenLabs */
 function h32(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16).padStart(8,"0")}
 /* Голос с сервера (новые фразы) обрабатываем так же, как готовые файлы: ярче и ровнее по громкости */
