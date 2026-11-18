@@ -117,6 +117,10 @@ h2{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.01em;
 .m.sel{border-color:var(--a);background:var(--gt)}
 .m.done{opacity:.4;background:rgba(127,184,154,.14);border-color:var(--ok);pointer-events:none}
 .m.bad{background:rgba(201,122,122,.16);border-color:var(--bad);animation:shake .4s}
+.dragging{opacity:.3}.over{outline:2px solid var(--g);outline-offset:2px;transform:scale(1.06);background:var(--gt)}
+.ghost{box-shadow:0 14px 34px rgba(0,0,0,.55);opacity:.96;transition:none!important;animation:none!important}
+.tile,.slot.f,.m[data-s="l"]{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.dhint{text-align:center;color:var(--muted);font-size:12px;margin:2px 0 6px}
 .slots,.tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0}
 .slot,.tile{width:44px;height:54px;border-radius:12px;font-family:var(--serif);font-size:26px;font-weight:600;color:var(--text);cursor:pointer}
 .slot{border:1px dashed var(--line2);background:transparent}
@@ -1080,12 +1084,39 @@ function cardsGame(){
 }
 
 /* ---- match ---- */
+/* ---- перетаскивание: нажатие работает как раньше, а если потянуть — предмет едет за пальцем ---- */
+function dragify(items,o){
+  items.forEach(el=>{
+    el.style.touchAction="none";
+    el.addEventListener("click",e=>{if(Date.now()-(window._dd||0)<400){e.stopImmediatePropagation();e.preventDefault()}},true);
+    el.addEventListener("pointerdown",e=>{
+      if(e.button>0)return;const sx=e.clientX,sy=e.clientY;let g=null,moved=false;
+      const clear=()=>view.querySelectorAll(".over").forEach(x=>x.classList.remove("over"));
+      const at=ev=>{const t=document.elementFromPoint(ev.clientX,ev.clientY);return t?o.at(t):null};
+      const mv=ev=>{
+        if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8){
+          moved=true;g=el.cloneNode(true);g.classList.add("ghost");const r=el.getBoundingClientRect();
+          g.style.cssText+=";position:fixed;left:"+r.left+"px;top:"+r.top+"px;width:"+r.width+"px;height:"+r.height+"px;z-index:90;pointer-events:none;margin:0;transform:scale(1.12)";
+          document.body.appendChild(g);el.classList.add("dragging");try{SFX.tap()}catch(x){}
+        }
+        if(moved){g.style.left=(ev.clientX-g.offsetWidth/2)+"px";g.style.top=(ev.clientY-g.offsetHeight/2)+"px";clear();const t=at(ev);if(t&&t!==el)t.classList.add("over")}
+      };
+      const up=ev=>{
+        removeEventListener("pointermove",mv);removeEventListener("pointerup",up);removeEventListener("pointercancel",up);
+        if(!moved)return;window._dd=Date.now();const t=at(ev);g.remove();el.classList.remove("dragging");clear();
+        o.drop(el,t,ev);
+      };
+      addEventListener("pointermove",mv);addEventListener("pointerup",up);addEventListener("pointercancel",up);
+    });
+  });
+}
 function matchGame(){
   const ws=shuffle(ALL).slice(0,6),Lw=shuffle(ws.map((w,i)=>i)),Rw=shuffle(ws.map((w,i)=>i));
   let done=0,miss=0,sL=null,sR=null;
-  view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">Соедините английское слово с переводом</div>
+  view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">Соедините английское слово с переводом: нажми на пару или перетащи слово на перевод</div>
   <div class="mgrid">${Lw.map((id,k)=>`<button class="m" data-s="l" data-id="${id}">${ws[id].en}</button><button class="m" data-s="r" data-id="${Rw[k]}">${ws[Rw[k]].ru}</button>`).join("")}</div>`;
   $("#bk").onclick=Play;
+  dragify(view.querySelectorAll('.m[data-s="l"]:not(.done)'),{at:t=>{const m=t.closest('.m[data-s="r"]');return m&&!m.classList.contains("done")?m:null},drop:(el,t)=>{if(!t||el.classList.contains("done"))return;el.onclick();t.onclick()}});
   view.querySelectorAll(".m").forEach(el=>el.onclick=()=>{
     if(el.classList.contains("done"))return;
     SFX.tap();const side=el.dataset.s;
@@ -1121,7 +1152,7 @@ function buildGame(){
       <div class="card center"><div class="muted">Напишите это слово по-английски</div><div class="en2">${w.ru}</div><div class="muted">[${w.tr}]</div>
       <button class="icon" id="sp" style="margin-top:8px">🔊</button></div>
       <div class="slots" id="sl">${slots.map((s,k)=>`<button class="slot${s!==null?" f":""}" data-k="${k}">${s!==null?letters[s].toUpperCase():""}</button>`).join("")}</div>
-      <div class="tiles">${letters.map((l,k)=>slots.includes(k)?`<button class="tile used" disabled>${l.toUpperCase()}</button>`:`<button class="tile" data-k="${k}">${l.toUpperCase()}</button>`).join("")}</div>`;
+      <div class="dhint">нажимай или перетаскивай буквы</div><div class="tiles">${letters.map((l,k)=>slots.includes(k)?`<button class="tile used" disabled>${l.toUpperCase()}</button>`:`<button class="tile" data-k="${k}">${l.toUpperCase()}</button>`).join("")}</div>`;
       $("#bk").onclick=Play;$("#sp").onclick=()=>say(w.en);
       view.querySelectorAll(".tile:not(.used)").forEach(t=>t.onclick=()=>{
         if(locked)return;const e=slots.indexOf(null);if(e<0)return;
@@ -1131,6 +1162,12 @@ function buildGame(){
       view.querySelectorAll(".slot").forEach(s=>s.onclick=()=>{
         if(locked)return;if(slots[s.dataset.k]!==null){slots[s.dataset.k]=null;SFX.tap();draw()}
       });
+      dragify(view.querySelectorAll(".tile:not(.used), .slot.f"),{at:t=>t.closest(".slot"),drop:(el,t)=>{
+        if(locked)return;
+        if(el.classList.contains("slot")){const f=+el.dataset.k;if(t){const to=+t.dataset.k;if(to!==f){const x=slots[to];slots[to]=slots[f];slots[f]=x}}else slots[f]=null}
+        else{if(!t)return;slots[+t.dataset.k]=+el.dataset.k}
+        SFX.pop();draw();if(!slots.includes(null))check();
+      }});
     }
     function check(){
       locked=true;
@@ -1188,11 +1225,19 @@ function sentGame(extra){
     function draw(){
       view.innerHTML=`<button class="back" id="bk">← Игры</button><div class="muted">${extra?"Лишние слова есть! ":""}Собери фразу · ${r+1}/${pool.length}</div><div class="bar"><div style="width:${r/pool.length*100}%"></div></div>
       <div class="card center"><div class="en2" style="font-size:24px">${w[2]}</div><div class="muted">[${w[1]}]</div><button class="icon" id="sp" style="margin-top:8px">🔊</button></div>
-      <div class="slots wl" id="sl">${sel.map(k=>`<button class="tile w" data-s="${k}">${L[k]}</button>`).join("")||'<span class="muted">Нажимай слова по порядку</span>'}</div>
+      <div class="slots wl" id="sl">${sel.map(k=>`<button class="tile w" data-s="${k}">${L[k]}</button>`).join("")||'<span class="muted">Нажимай или перетаскивай слова сюда по порядку</span>'}</div>
       <div class="tiles">${L.map((x,k)=>sel.includes(k)?`<button class="tile w used" disabled>${x}</button>`:`<button class="tile w" data-k="${k}">${x}</button>`).join("")}</div>`;
       $("#bk").onclick=Play;$("#sp").onclick=()=>say(w[0]);
       view.querySelectorAll(".tiles .tile:not(.used)").forEach(t=>t.onclick=()=>{if(locked)return;sel.push(+t.dataset.k);SFX.pop();draw();if(sel.length===tk.length)check()});
       view.querySelectorAll("#sl .tile").forEach(t=>t.onclick=()=>{if(locked)return;sel=sel.filter(k=>k!==+t.dataset.s);SFX.tap();draw()});
+      dragify(view.querySelectorAll(".tiles .tile:not(.used), #sl .tile"),{at:t=>t.closest("#sl")||t.closest(".tiles"),drop:(el,t,ev)=>{
+        if(locked||!t)return;const k=+(el.dataset.s!=null?el.dataset.s:el.dataset.k);
+        sel=sel.filter(x=>x!==k);
+        if(t.id==="sl"){const ts=[...view.querySelectorAll("#sl .tile")].filter(x=>x!==el);let pos=ts.length;
+          for(let j=0;j<ts.length;j++){const r=ts[j].getBoundingClientRect();if(ev.clientY<r.top-4||(ev.clientY<=r.bottom&&ev.clientX<r.left+r.width/2)){pos=j;break}}
+          sel.splice(pos,0,k)}
+        SFX.pop();draw();if(sel.length===tk.length)check();
+      }});
     }
     function check(){
       locked=true;
