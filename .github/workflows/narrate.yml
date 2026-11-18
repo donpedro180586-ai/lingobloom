@@ -7,8 +7,13 @@ on:
         type: choice
         default: ru-RU-SvetlanaNeural
         options: [ru-RU-SvetlanaNeural, ru-RU-DmitryNeural]
+      engine:
+        description: "eleven = ElevenLabs Bella (uses credits), free = Microsoft voice"
+        type: choice
+        default: eleven
+        options: [eleven, free]
       rate:
-        description: "Speed (e.g. +0%, +8%, -5%)"
+        description: "Speed (free voice only, e.g. +0%, +8%, -5%)"
         type: string
         default: "+0%"
 permissions:
@@ -27,6 +32,8 @@ jobs:
         env:
           NARRATOR_VOICE: ${{ inputs.voice }}
           NARRATOR_RATE: ${{ inputs.rate }}
+          NARRATOR_ENGINE: ${{ inputs.engine }}
+          ELEVENLABS_API_KEY: ${{ inputs.engine == 'eleven' && secrets.ELEVENLABS_API_KEY || '' }}
       - name: Commit narration
         run: |
           git config user.name "github-actions[bot]"
