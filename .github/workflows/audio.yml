@@ -28,6 +28,18 @@ on:
         description: "Speed (e.g. -20% slower, -10% default, +0% normal)"
         type: string
         default: "-10%"
+      upgrade:
+        description: "Re-voice texts with a better model, most important first (keeps old files for the rest)"
+        type: boolean
+        default: false
+      model:
+        description: ElevenLabs model for upgrade
+        type: string
+        default: eleven_multilingual_v2
+      max_chars:
+        description: "Stop after this many characters (1 char = 1 credit on multilingual_v2)"
+        type: string
+        default: "6500"
       force:
         description: Re-create ALL files (needed after changing voice or speed)
         type: boolean
@@ -56,6 +68,13 @@ jobs:
           TTS_VOICE: ${{ inputs.voice }}
           TTS_RATE: ${{ inputs.rate }}
           FORCE: ${{ inputs.force }}
+          UPGRADE: ${{ inputs.upgrade }}
+          ELEVENLABS_MODEL: ${{ inputs.upgrade && inputs.model || '' }}
+          MAX_CHARS: ${{ inputs.upgrade && inputs.max_chars || '' }}
+          EL_STABILITY: ${{ inputs.upgrade && '0.38' || '' }}
+          EL_SIMILARITY: ${{ inputs.upgrade && '0.8' || '' }}
+          EL_STYLE: ${{ inputs.upgrade && '0.25' || '' }}
+          POLISH: ${{ inputs.upgrade && '1' || '' }}
           MAX_MINUTES: "32"
           ELEVENLABS_API_KEY: ${{ inputs.engine != 'free' && secrets.ELEVENLABS_API_KEY || '' }}
       - name: Commit audio files

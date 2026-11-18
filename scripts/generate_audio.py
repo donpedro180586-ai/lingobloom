@@ -45,7 +45,12 @@ EL_KEY = (os.environ.get("ELEVENLABS_API_KEY") or "").strip()
 EL_VOICE = (os.environ.get("ELEVENLABS_VOICE_ID") or "").strip() or "hpp4J3VqNfWAUOO0d1Us"  # Bella
 EL_MODEL = (os.environ.get("ELEVENLABS_MODEL") or "").strip() or "eleven_flash_v2_5"   # half the credits of multilingual_v2
 EL_BASE = (os.environ.get("ELEVENLABS_BASE_URL") or "").strip() or "https://api.elevenlabs.io"
-EL_STABILITY, EL_SIMILARITY, EL_SPEED = 0.5, 0.8, 0.95   # same settings as the Worker (/tts)
+EL_STABILITY = float(os.environ.get("EL_STABILITY") or 0.5)
+EL_SIMILARITY = float(os.environ.get("EL_SIMILARITY") or 0.8)
+EL_SPEED = float(os.environ.get("EL_SPEED") or 0.95)
+EL_STYLE = float(os.environ.get("EL_STYLE") or 0)
+UPGRADE = os.environ.get("UPGRADE", "").lower() == "true"       # re-voice texts with a better model, in priority order
+MAX_CHARS = int(os.environ.get("MAX_CHARS") or 0)                # stop after this many characters (0 = no limit)
 QUOTA_HIT = False   # set when ElevenLabs says the monthly credits are used up
 
 
@@ -103,8 +108,14 @@ def load_meta():
     return None
 
 
+_UP_DONE = None
+
+
 def save_meta(meta: dict) -> None:
     OUT.mkdir(exist_ok=True)
+    if UPGRADE and _UP_DONE is not None:   # upgrade mode keeps its own list and never touches the main meta
+        (OUT / "_upgraded.json").write_text(json.dumps(sorted(_UP_DONE)))
+        return
     META.write_text(json.dumps(meta, ensure_ascii=False), encoding="utf-8")
 
 
@@ -127,7 +138,7 @@ def make_eleven(text, path) -> bool:
     body = json.dumps({
         "text": text,
         "model_id": EL_MODEL,
-        "voice_settings": {"stability": EL_STABILITY, "similarity_boost": EL_SIMILARITY, "speed": EL_SPEED},
+        "voice_settings": {"stability": EL_STABILITY, "similarity_boost": EL_SIMILARITY, "speed": EL_SPEED, "style": EL_STYLE, "use_speaker_boost": True},
     }).encode()
     req = urllib.request.Request(
         url, data=body, method="POST",
@@ -232,10 +243,18 @@ async def main() -> int:
     voice = os.environ.get("TTS_VOICE") or (mv if mv and not mv.startswith("elevenlabs:") else "") or DEFAULT_VOICE
     rate = os.environ.get("TTS_RATE") or (meta or {}).get("rate") or DEFAULT_RATE
     label = f"elevenlabs:{EL_VOICE}:{EL_MODEL}" if EL_KEY else voice
-    if FORCE or not meta or meta.get("voice") != label or meta.get("rate") != rate:
-        meta = {"voice": label, "rate": rate, "done": []}
-        print(f"Re-creating all files: engine={label} rate={rate}", flush=True)
-    done = set(meta["done"])
+    UPF = OUT / "_upgraded.json"
+    if UPGRADE:
+        print(f"UPGRADE mode: model={EL_MODEL} stability={EL_STABILITY} style={EL_STYLE}, budget={MAX_CHARS or 'unlimited'} chars", flush=True)
+        done = set(json.loads(UPF.read_text())) if UPF.exists() else set()
+    else:
+        if FORCE or not meta or meta.get("voice") != label or meta.get("rate") != rate:
+            meta = {"voice": label, "rate": rate, "done": []}
+            print(f"Re-creating all files: engine={label} rate={rate}", flush=True)
+        done = set(meta["done"])
+    global _UP_DONE
+    _UP_DONE = done
+    spent = {"c": 0}
 
     E = Engines()
     failed = []
@@ -257,6 +276,9 @@ async def main() -> int:
             if budget and time.monotonic() - t0 > budget:
                 state["late"] = True
                 return
+            if MAX_CHARS and spent["c"] >= MAX_CHARS:
+                state["late"] = True
+                return
             ok = await synth(t, OUT / f"{h32(t)}.mp3", voice, rate, E)
             if QUOTA_HIT and have_all:   # credits are gone: keep the current files instead of replacing them with worse ones
                 state["stop"] = True
@@ -264,6 +286,7 @@ async def main() -> int:
             print(f"[{i}/{len(texts)}] {'ok  ' if ok else 'FAIL'} {t}", flush=True)
             if ok:
                 done.add(h32(t))
+                spent["c"] += len(t)
             else:
                 failed.append(t)
             state["n"] += 1
@@ -271,12 +294,19 @@ async def main() -> int:
                 save_meta({"voice": label, "rate": rate, "done": sorted(done)})
 
     await asyncio.gather(*(one(i, t) for i, t in todo))
+    if state["stop"] and UPGRADE:
+        save_meta({})
+        print(f"STOP: credits are used up. Upgraded {len(done)} texts so far; they are kept.", flush=True)
+        return 0
     if state["stop"]:
         print("STOP: ElevenLabs credits are used up (quota_exceeded). The existing audio files were NOT changed.\n"
               "Run again when the credits are back, or choose engine=free in the workflow to use a free Microsoft voice.", flush=True)
         return 3
     if state["late"]:
         save_meta({"voice": label, "rate": rate, "done": sorted(done)})
+        if UPGRADE:
+            print(f"UPGRADE: {len(done)} of {len(texts)} texts re-voiced ({spent['c']} characters this run).", flush=True)
+            return 0
         left = len([1 for _, t in todo if h32(t) not in done])
         print(f"PARTIAL: time budget reached, {left} of {len(texts)} still to do. "
               f"Run the workflow again (leave 'force' OFF) to continue.", flush=True)
@@ -290,6 +320,10 @@ async def main() -> int:
                 failed.remove(t)
                 print(f"  ok   {t}", flush=True)
 
+    if UPGRADE:
+        save_meta({})
+        print(f"UPGRADE done: {len(done)} of {len(texts)} texts re-voiced.", flush=True)
+        return 0
     keep = {h32(t) for t in texts}
     for p in OUT.glob("*.mp3"):  # remove files that are no longer used
         if p.stem not in keep:
